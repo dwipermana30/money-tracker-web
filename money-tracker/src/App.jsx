@@ -7,6 +7,41 @@ const APP_PASSWORD = '3003';
 const FIRESTORE_COLLECTION = 'financeApps';
 const FIRESTORE_DOCUMENT_ID = 'main-data';
 
+const PERIOD_OPTIONS = [
+  { value: 'all', label: 'Semua' },
+  { value: 'today', label: 'Hari ini' },
+  { value: 'week', label: '7 hari terakhir' },
+  { value: 'month', label: 'Bulan ini' },
+  { value: 'lastMonth', label: 'Bulan lalu' },
+  { value: 'year', label: 'Tahun ini' }
+];
+
+// Format tanggal lokal (YYYY-MM-DD), tanpa toISOString agar tidak bergeser karena zona waktu
+const toDateStr = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+// Mengembalikan [tanggalMulai, tanggalAkhir] (inklusif), atau null untuk "Semua"
+const getPeriodRange = (period) => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+
+  switch (period) {
+    case 'today':
+      return [toDateStr(now), toDateStr(now)];
+    case 'week':
+      return [toDateStr(new Date(y, m, now.getDate() - 6)), toDateStr(now)];
+    case 'month':
+      return [toDateStr(new Date(y, m, 1)), toDateStr(new Date(y, m + 1, 0))];
+    case 'lastMonth':
+      return [toDateStr(new Date(y, m - 1, 1)), toDateStr(new Date(y, m, 0))];
+    case 'year':
+      return [toDateStr(new Date(y, 0, 1)), toDateStr(new Date(y, 11, 31))];
+    default:
+      return null;
+  }
+};
+
 export default function App() {
   const today = () => new Date().toISOString().split('T')[0];
 
@@ -30,6 +65,7 @@ const [cloudStatus, setCloudStatus] = useState('Menghubungkan ke Firestore...');
   const [passwordError, setPasswordError] = useState('');
 
   const [activeTab, setActiveTab] = useState('transactions');
+  const [period, setPeriod] = useState('month');
   const [showDecimals, setShowDecimals] = useState(false);
   const [showGraph, setShowGraph] = useState(true);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
@@ -181,6 +217,21 @@ useEffect(() => {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalBalance = totalIncome - totalExpenses;
+
+  const periodRange = getPeriodRange(period);
+  const periodTransactions = periodRange
+    ? transactions.filter((t) => t.date >= periodRange[0] && t.date <= periodRange[1])
+    : transactions;
+
+  const periodIncome = periodTransactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const periodExpenses = periodTransactions
+    .filter((t) => t.type === 'expense' || t.type === 'loanPayment')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const periodBalance = periodIncome - periodExpenses;
 
   const reportTransactions = transactions.filter((t) => t.date >= startDate && t.date <= endDate);
 
@@ -647,30 +698,50 @@ if (isCloudLoading) {
       <main className="flex-1 overflow-y-auto">
         {activeTab === 'transactions' && (
           <div className="p-4">
+            <div className="mb-3">
+              <label className="block text-gray-500 text-xs mb-1">Periode</label>
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                className="w-full p-2 border rounded-lg bg-white text-sm focus:outline-none focus:border-[#2196f3]"
+              >
+                {PERIOD_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {periodRange && (
+                <p className="text-[11px] text-gray-400 mt-1">
+                  {formatDateLabel(periodRange[0])} - {formatDateLabel(periodRange[1])}
+                </p>
+              )}
+            </div>
+
             <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between text-center mb-4">
               <div>
                 <p className="text-xs text-gray-400">Income</p>
-                <p className="font-bold text-green-600">{formatNumber(totalIncome)}</p>
+                <p className="font-bold text-green-600">{formatNumber(periodIncome)}</p>
               </div>
               <div className="border-r border-gray-100"></div>
               <div>
                 <p className="text-xs text-gray-400">Expenses</p>
-                <p className="font-bold text-red-500">{formatNumber(totalExpenses)}</p>
+                <p className="font-bold text-red-500">{formatNumber(periodExpenses)}</p>
               </div>
               <div className="border-r border-gray-100"></div>
               <div>
                 <p className="text-xs text-gray-400">Balance</p>
-                <p className="font-bold text-blue-600">{formatNumber(totalBalance)}</p>
+                <p className="font-bold text-blue-600">{formatNumber(periodBalance)}</p>
               </div>
             </div>
 
-            {transactions.length === 0 ? (
+            {periodTransactions.length === 0 ? (
               <div className="h-80 flex items-center justify-center text-gray-300 text-sm">
                 Tidak ada data
               </div>
             ) : (
               <div className="space-y-3">
-                {transactions.map((t) => (
+                {periodTransactions.map((t) => (
                   <button
                     key={t.id}
                     type="button"
