@@ -12,6 +12,41 @@ const toDateStr = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 
+const PERIOD_OPTIONS = [
+  { value: 'all', label: 'Semua' },
+  { value: 'today', label: 'Hari ini' },
+  { value: 'week', label: '7 hari terakhir' },
+  { value: 'days30', label: '30 hari terakhir' },
+  { value: 'month', label: 'Bulan ini' },
+  { value: 'lastMonth', label: 'Bulan lalu' },
+  { value: 'year', label: 'Tahun ini' },
+  { value: 'custom', label: 'Custom date' }
+];
+
+// Mengembalikan [tanggalMulai, tanggalAkhir] (inklusif), atau [null, null] untuk "Semua"
+const getPeriodRange = (period) => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+
+  switch (period) {
+    case 'today':
+      return [toDateStr(now), toDateStr(now)];
+    case 'week':
+      return [toDateStr(new Date(y, m, now.getDate() - 6)), toDateStr(now)];
+    case 'days30':
+      return [toDateStr(new Date(y, m, now.getDate() - 29)), toDateStr(now)];
+    case 'month':
+      return [toDateStr(new Date(y, m, 1)), toDateStr(new Date(y, m + 1, 0))];
+    case 'lastMonth':
+      return [toDateStr(new Date(y, m - 1, 1)), toDateStr(new Date(y, m, 0))];
+    case 'year':
+      return [toDateStr(new Date(y, 0, 1)), toDateStr(new Date(y, 11, 31))];
+    default:
+      return [null, null];
+  }
+};
+
 export default function App() {
   const today = () => new Date().toISOString().split('T')[0];
 
@@ -35,14 +70,9 @@ const [cloudStatus, setCloudStatus] = useState('Menghubungkan ke Firestore...');
   const [passwordError, setPasswordError] = useState('');
 
   const [activeTab, setActiveTab] = useState('transactions');
-  const [txStartDate, setTxStartDate] = useState(() => {
-    const d = new Date();
-    return toDateStr(new Date(d.getFullYear(), d.getMonth(), 1));
-  });
-  const [txEndDate, setTxEndDate] = useState(() => {
-    const d = new Date();
-    return toDateStr(new Date(d.getFullYear(), d.getMonth() + 1, 0));
-  });
+  const [period, setPeriod] = useState('month');
+  const [txStartDate, setTxStartDate] = useState(() => getPeriodRange('month')[0]);
+  const [txEndDate, setTxEndDate] = useState(() => getPeriodRange('month')[1]);
   const [showDecimals, setShowDecimals] = useState(false);
   const [showGraph, setShowGraph] = useState(true);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
@@ -195,9 +225,13 @@ useEffect(() => {
 
   const totalBalance = totalIncome - totalExpenses;
 
-  const isTxRangeInvalid = Boolean(txStartDate && txEndDate && txStartDate > txEndDate);
+  const [rangeStart, rangeEnd] =
+    period === 'custom'
+      ? [txStartDate || null, txEndDate || null]
+      : getPeriodRange(period);
+  const isTxRangeInvalid = Boolean(rangeStart && rangeEnd && rangeStart > rangeEnd);
   const periodTransactions = transactions.filter(
-    (t) => (!txStartDate || t.date >= txStartDate) && (!txEndDate || t.date <= txEndDate)
+    (t) => (!rangeStart || t.date >= rangeStart) && (!rangeEnd || t.date <= rangeEnd)
   );
 
   const periodIncome = periodTransactions
@@ -676,26 +710,56 @@ if (isCloudLoading) {
         {activeTab === 'transactions' && (
           <div className="p-4">
             <div className="mb-3">
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <label className="block text-gray-500 mb-1">Start Date</label>
-                  <input
-                    type="date"
-                    value={txStartDate}
-                    onChange={(e) => setTxStartDate(e.target.value)}
-                    className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
-                  />
+              <label className="block text-gray-500 text-xs mb-1">Periode</label>
+              <select
+                value={period}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (next === 'custom') {
+                    // isi awal custom dengan rentang periode yang sedang aktif
+                    setTxStartDate(rangeStart || '');
+                    setTxEndDate(rangeEnd || '');
+                  }
+                  setPeriod(next);
+                }}
+                className="w-full p-2 border rounded-lg bg-white text-sm focus:outline-none focus:border-[#2196f3]"
+              >
+                {PERIOD_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              {period === 'custom' ? (
+                <div className="grid grid-cols-2 gap-3 text-xs mt-3">
+                  <div>
+                    <label className="block text-gray-500 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={txStartDate}
+                      onChange={(e) => setTxStartDate(e.target.value)}
+                      className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-500 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={txEndDate}
+                      onChange={(e) => setTxEndDate(e.target.value)}
+                      className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-gray-500 mb-1">End Date</label>
-                  <input
-                    type="date"
-                    value={txEndDate}
-                    onChange={(e) => setTxEndDate(e.target.value)}
-                    className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
-                  />
-                </div>
-              </div>
+              ) : (
+                rangeStart && (
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    {formatDateLabel(rangeStart)} - {formatDateLabel(rangeEnd)}
+                  </p>
+                )
+              )}
+
               {isTxRangeInvalid && (
                 <p className="text-[11px] text-red-500 mt-1">
                   Start Date tidak boleh lebih besar dari End Date
