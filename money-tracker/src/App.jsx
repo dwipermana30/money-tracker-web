@@ -48,6 +48,81 @@ const getPeriodRange = (period) => {
 };
 
 const ICONS = {
+  food: (
+    <>
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <path d="M7 2v20" />
+      <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+    </>
+  ),
+  car: (
+    <>
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+      <circle cx="7" cy="17" r="2" />
+      <path d="M9 17h6" />
+      <circle cx="17" cy="17" r="2" />
+    </>
+  ),
+  bag: (
+    <>
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <path d="M3 6h18" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </>
+  ),
+  receipt: (
+    <>
+      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+      <path d="M12 17.5v-11" />
+    </>
+  ),
+  film: (
+    <>
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18M17 7.5h4M17 16.5h4" />
+    </>
+  ),
+  heart: (
+    <>
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
+    </>
+  ),
+  cap: (
+    <>
+      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+      <path d="M22 10v6" />
+      <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+    </>
+  ),
+  more: (
+    <>
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="19" cy="12" r="1" />
+      <circle cx="5" cy="12" r="1" />
+    </>
+  ),
+  briefcase: (
+    <>
+      <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+      <rect width="20" height="14" x="2" y="6" rx="2" />
+    </>
+  ),
+  gift: (
+    <>
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13" />
+      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
+    </>
+  ),
+  trend: (
+    <>
+      <path d="m22 7-8.5 8.5-5-5L2 17" />
+      <path d="M16 7h6v6" />
+    </>
+  ),
   list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   wallet: (
     <>
@@ -89,6 +164,101 @@ const ICONS = {
   )
 };
 
+const EXPENSE_CATEGORIES = [
+  { name: 'Makanan', icon: 'food' },
+  { name: 'Transport', icon: 'car' },
+  { name: 'Belanja', icon: 'bag' },
+  { name: 'Tagihan', icon: 'receipt' },
+  { name: 'Hiburan', icon: 'film' },
+  { name: 'Kesehatan', icon: 'heart' },
+  { name: 'Pendidikan', icon: 'cap' },
+  { name: 'Lainnya', icon: 'more' }
+];
+
+const INCOME_CATEGORIES = [
+  { name: 'Gaji', icon: 'briefcase' },
+  { name: 'Bonus', icon: 'gift' },
+  { name: 'Investasi', icon: 'trend' },
+  { name: 'Lainnya', icon: 'more' }
+];
+
+const LOAN_CATEGORY = { name: 'Pinjaman', icon: 'loan' };
+
+// Sumbu grafik radar: semua kategori pengeluaran + pembayaran pinjaman
+const RADAR_AXES = [...EXPENSE_CATEGORIES, LOAN_CATEGORY];
+
+const CATEGORY_ICON = {};
+[...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES, LOAN_CATEGORY].forEach((c) => {
+  CATEGORY_ICON[c.name] = c.icon;
+});
+
+// Transaksi lama belum punya kategori -> dianggap "Lainnya". Transfer tidak punya kategori.
+const getCategoryName = (t) => {
+  if (t.type === 'transfer') return '';
+  if (t.type === 'loanPayment') return LOAN_CATEGORY.name;
+  return t.category || 'Lainnya';
+};
+
+const getTxIcon = (t) => {
+  if (t.type === 'transfer') return 'transfer';
+  return CATEGORY_ICON[getCategoryName(t)] || (t.type === 'income' ? 'arrowDown' : 'arrowUp');
+};
+
+function RadarChart({ items }) {
+  const n = items.length;
+  const max = Math.max(0, ...items.map((i) => i.value));
+  const R = 27;
+  const angle = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const point = (i, r) => [50 + r * Math.cos(angle(i)), 50 + r * Math.sin(angle(i))];
+  const ring = (level) => items.map((_, i) => point(i, R * level).join(',')).join(' ');
+  const shape = items
+    .map((item, i) => point(i, max > 0 ? R * (item.value / max) : 0).join(','))
+    .join(' ');
+
+  return (
+    <div className="relative w-full aspect-square">
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+        {[0.25, 0.5, 0.75, 1].map((level) => (
+          <polygon key={level} points={ring(level)} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.3" />
+        ))}
+        {items.map((item, i) => {
+          const [x, y] = point(i, R);
+          return <line key={item.name} x1="50" y1="50" x2={x} y2={y} stroke="rgba(255,255,255,0.12)" strokeWidth="0.3" />;
+        })}
+        <polygon
+          points={shape}
+          fill="rgba(242,169,126,0.28)"
+          stroke="#f2a97e"
+          strokeWidth="0.6"
+          strokeLinejoin="round"
+        />
+        {items.map((item, i) => {
+          if (!(item.value > 0)) return null;
+          const [x, y] = point(i, R * (item.value / max));
+          return <circle key={item.name} cx={x} cy={y} r="0.9" fill="#f2a97e" />;
+        })}
+      </svg>
+
+      {items.map((item, i) => {
+        const [x, y] = point(i, 41);
+        return (
+          <div
+            key={item.name}
+            className="absolute flex flex-col items-center text-center -translate-x-1/2 -translate-y-1/2"
+            style={{ left: `${x}%`, top: `${y}%` }}
+          >
+            <Icon name={item.icon} className={`w-5 h-5 ${item.value > 0 ? 'text-peach' : 'text-white/30'}`} />
+            <span className="mt-0.5 text-[10px] leading-none px-1.5 py-0.5 rounded-full bg-white/10 text-white/80">
+              {item.percent}%
+            </span>
+            <span className="text-[9px] text-white/50 mt-0.5">{item.name}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Icon({ name, className = 'w-5 h-5' }) {
   return (
     <svg
@@ -106,16 +276,16 @@ function Icon({ name, className = 'w-5 h-5' }) {
 }
 
 export default function App() {
-  const today = () => new Date().toISOString().split('T')[0];
+  const today = () => toDateStr(new Date());
 
   const firstDay = () => {
     const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    return toDateStr(new Date(d.getFullYear(), d.getMonth(), 1));
   };
 
   const lastDay = () => {
     const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+    return toDateStr(new Date(d.getFullYear(), d.getMonth() + 1, 0));
   };
 
   const backupInputRef = useRef(null);
@@ -170,6 +340,7 @@ const [cloudStatus, setCloudStatus] = useState('Menghubungkan ke Firestore...');
     type: 'expense',
     wallet: DEFAULT_ACCOUNTS[0],
     loanId: '',
+    category: 'Lainnya',
     date: today()
   });
   const [toast, setToast] = useState(null);
@@ -271,13 +442,6 @@ useEffect(() => {
     return 'text-rose-300';
   };
 
-  const typeIcon = (type) => {
-    if (type === 'income') return 'arrowDown';
-    if (type === 'loanPayment') return 'loan';
-    if (type === 'transfer') return 'transfer';
-    return 'arrowUp';
-  };
-
   const typeIconStyle = (type) => {
     if (type === 'income') return 'bg-emerald-400/15 text-emerald-300';
     if (type === 'loanPayment') return 'bg-violet-400/15 text-violet-300';
@@ -349,6 +513,112 @@ useEffect(() => {
       return acc;
     }, {});
 
+  // --- Pengeluaran per kategori (radar) ---
+  const expenseCategoryTotals = {};
+  reportTransactions
+    .filter((t) => t.type === 'expense' || t.type === 'loanPayment')
+    .forEach((t) => {
+      let name = getCategoryName(t);
+      if (!RADAR_AXES.some((c) => c.name === name)) name = 'Lainnya';
+      expenseCategoryTotals[name] = (expenseCategoryTotals[name] || 0) + t.amount;
+    });
+
+  const radarItems = RADAR_AXES.map((c) => {
+    const value = expenseCategoryTotals[c.name] || 0;
+    return {
+      name: c.name,
+      icon: c.icon,
+      value,
+      percent: reportExpenses > 0 ? Math.round((value / reportExpenses) * 100) : 0
+    };
+  });
+
+  const categoryRows = radarItems.filter((item) => item.value > 0).sort((a, b) => b.value - a.value);
+
+  // --- Perbandingan dengan periode sebelumnya (panjang hari sama) ---
+  const parseDate = (value) => new Date(`${value}T00:00:00`);
+  const rangeValid = Boolean(startDate && endDate && startDate <= endDate);
+  const rangeDays = rangeValid
+    ? Math.round((parseDate(endDate) - parseDate(startDate)) / 86400000) + 1
+    : 0;
+
+  let prevExpenses = 0;
+  if (rangeValid) {
+    const prevEnd = parseDate(startDate);
+    prevEnd.setDate(prevEnd.getDate() - 1);
+    const prevStart = new Date(prevEnd);
+    prevStart.setDate(prevStart.getDate() - (rangeDays - 1));
+    const prevStartStr = toDateStr(prevStart);
+    const prevEndStr = toDateStr(prevEnd);
+
+    prevExpenses = transactions
+      .filter(
+        (t) =>
+          (t.type === 'expense' || t.type === 'loanPayment') &&
+          t.date >= prevStartStr &&
+          t.date <= prevEndStr
+      )
+      .reduce((sum, t) => sum + t.amount, 0);
+  }
+
+  const expenseChange =
+    prevExpenses > 0 ? Math.round(((reportExpenses - prevExpenses) / prevExpenses) * 100) : null;
+
+  // --- Expense dynamics: harian (<= 62 hari) atau bulanan ---
+  const dynamicsByMonth = rangeDays > 62;
+  const dynamicsMap = {};
+  reportTransactions
+    .filter((t) => t.type === 'expense' || t.type === 'loanPayment')
+    .forEach((t) => {
+      const key = dynamicsByMonth ? t.date.slice(0, 7) : t.date;
+      dynamicsMap[key] = (dynamicsMap[key] || 0) + t.amount;
+    });
+
+  const dynamics = [];
+  if (rangeValid) {
+    const cursor = parseDate(startDate);
+    if (!dynamicsByMonth) {
+      for (let i = 0; i < rangeDays; i++) {
+        const key = toDateStr(cursor);
+        dynamics.push({ key, value: dynamicsMap[key] || 0 });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    } else {
+      cursor.setDate(1);
+      const end = parseDate(endDate);
+      while (cursor <= end) {
+        const key = toDateStr(cursor).slice(0, 7);
+        dynamics.push({ key, value: dynamicsMap[key] || 0 });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+    }
+  }
+
+  const dynamicsMax = Math.max(0, ...dynamics.map((d) => d.value));
+  const dynPoints = dynamics.length === 1 ? [dynamics[0], dynamics[0]] : dynamics;
+  const dynX = (i) => (dynPoints.length > 1 ? (i / (dynPoints.length - 1)) * 300 : 0);
+  const dynY = (v) => 108 - (dynamicsMax > 0 ? (v / dynamicsMax) * 98 : 0);
+
+  let dynamicsLinePath = '';
+  dynPoints.forEach((d, i) => {
+    const x = dynX(i);
+    const y = dynY(d.value);
+    if (i === 0) {
+      dynamicsLinePath = `M${x},${y}`;
+    } else {
+      const px = dynX(i - 1);
+      const py = dynY(dynPoints[i - 1].value);
+      const mx = (px + x) / 2;
+      dynamicsLinePath += ` C${mx},${py} ${mx},${y} ${x},${y}`;
+    }
+  });
+  const dynamicsAreaPath = dynPoints.length > 1 ? `${dynamicsLinePath} L300,110 L0,110 Z` : '';
+
+  const dynamicsLabel = (key) =>
+    key.length === 7
+      ? new Date(`${key}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+      : formatDateLabel(key);
+
   const totalLoanRemaining = loans.reduce((sum, loan) => sum + loan.remaining, 0);
 
   const getWalletBalance = (walletName) => {
@@ -380,6 +650,7 @@ useEffect(() => {
       type: 'expense',
       wallet: accounts[0] || '',
       loanId: loans[0]?.id || '',
+      category: 'Lainnya',
       date: today()
     });
   };
@@ -392,6 +663,7 @@ useEffect(() => {
       type,
       wallet: accounts[0] || '',
       loanId: loans[0]?.id || '',
+      category: 'Lainnya',
       date: today()
     });
     setTransactionModalOpen(true);
@@ -407,6 +679,7 @@ useEffect(() => {
       type: transaction.type,
       wallet: transaction.wallet,
       loanId: transaction.loanId || '',
+      category: transaction.category || 'Lainnya',
       date: transaction.date
     });
     setTransactionModalOpen(true);
@@ -456,12 +729,12 @@ useEffect(() => {
     const title =
       form.title ||
       (form.type === 'income'
-        ? 'Income Baru'
+        ? form.category || 'Income Baru'
         : form.type === 'loanPayment'
         ? 'Pembayaran Pinjaman'
         : form.type === 'transfer'
         ? 'Transfer Baru'
-        : 'Expense Baru');
+        : form.category || 'Expense Baru');
 
     const newTransaction = {
       id: editingTransactionId || Date.now(),
@@ -470,6 +743,12 @@ useEffect(() => {
       type: form.type,
       wallet: form.wallet,
       loanId: form.type === 'loanPayment' ? form.loanId : '',
+      category:
+        form.type === 'income' || form.type === 'expense'
+          ? form.category || 'Lainnya'
+          : form.type === 'loanPayment'
+          ? LOAN_CATEGORY.name
+          : '',
       date: form.date
     };
 
@@ -894,12 +1173,12 @@ if (isCloudLoading) {
                     <div
                       className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${typeIconStyle(t.type)}`}
                     >
-                      <Icon name={typeIcon(t.type)} className="w-5 h-5" />
+                      <Icon name={getTxIcon(t)} className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{t.title}</p>
                       <p className="text-xs text-white/50">
-                        {t.wallet} · {formatDateLabel(t.date)}
+                        {[getCategoryName(t), t.wallet, formatDateLabel(t.date)].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     <div className={`font-semibold text-sm whitespace-nowrap ${typeColor(t.type)}`}>
@@ -973,6 +1252,29 @@ if (isCloudLoading) {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="glass rounded-3xl p-5">
+                <p className="text-xs text-white/60">Total pengeluaran</p>
+                <div className="flex items-end gap-2 mt-1">
+                  <p className="font-serif text-3xl">{formatNumber(reportExpenses)}</p>
+                  {expenseChange !== null && (
+                    <span
+                      className={`mb-1 text-[11px] px-2 py-0.5 rounded-full ${
+                        expenseChange <= 0
+                          ? 'bg-emerald-400/15 text-emerald-300'
+                          : 'bg-rose-400/15 text-rose-300'
+                      }`}
+                    >
+                      {expenseChange <= 0 ? '↓' : '↑'} {Math.abs(expenseChange)}%
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-white/50 mt-1">
+                  {expenseChange !== null
+                    ? `dibanding periode sebelumnya (${formatNumber(prevExpenses)})`
+                    : 'Belum ada data periode sebelumnya untuk dibandingkan'}
+                </p>
               </div>
 
               <div className="p-4 glass rounded-2xl flex justify-between items-center text-sm">
@@ -1087,6 +1389,85 @@ if (isCloudLoading) {
                         <span className="font-semibold">{formatNumber(amount)}</span>
                       </div>
                     ))
+                  )}
+                </div>
+              )}
+
+              {showGraph && (
+                <div className="glass rounded-3xl p-4">
+                  <h3 className="font-serif text-lg mb-1">Pengeluaran per kategori</h3>
+                  {reportExpenses === 0 ? (
+                    <p className="text-sm text-white/40 py-10 text-center">
+                      Tidak ada pengeluaran pada periode ini
+                    </p>
+                  ) : (
+                    <RadarChart items={radarItems} />
+                  )}
+                </div>
+              )}
+
+              {categoryRows.length > 0 && (
+                <div className="glass rounded-2xl p-4 space-y-4">
+                  {categoryRows.map((item) => (
+                    <div key={item.name} className="flex items-center gap-3">
+                      <div className="w-9 h-9 shrink-0 rounded-full bg-white/10 text-peach flex items-center justify-center">
+                        <Icon name={item.icon} className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-semibold">{item.name}</span>
+                          <span className="font-semibold">{formatNumber(item.value)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-peach rounded-full" style={{ width: `${item.percent}%` }}></div>
+                          </div>
+                          <span className="text-[11px] text-white/50 w-8 text-right">{item.percent}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showGraph && (
+                <div className="glass rounded-3xl p-4">
+                  <div className="flex justify-between items-baseline mb-3">
+                    <h3 className="font-serif text-lg">Expense dynamics</h3>
+                    {dynamicsMax > 0 && (
+                      <span className="text-[11px] text-white/50">Puncak {formatNumber(dynamicsMax)}</span>
+                    )}
+                  </div>
+
+                  {dynamicsMax === 0 ? (
+                    <p className="text-sm text-white/40 py-6 text-center">
+                      Tidak ada pengeluaran pada periode ini
+                    </p>
+                  ) : (
+                    <>
+                      <svg viewBox="0 0 300 110" preserveAspectRatio="none" className="w-full h-28">
+                        <defs>
+                          <linearGradient id="dynFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#f2a97e" stopOpacity="0.45" />
+                            <stop offset="100%" stopColor="#f2a97e" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={dynamicsAreaPath} fill="url(#dynFill)" />
+                        <path
+                          d={dynamicsLinePath}
+                          fill="none"
+                          stroke="#f2a97e"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                      <div className="flex justify-between text-[10px] text-white/50 mt-1">
+                        <span>{dynamicsLabel(dynamics[0].key)}</span>
+                        <span>{dynamicsLabel(dynamics[dynamics.length - 1].key)}</span>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
@@ -1305,6 +1686,29 @@ if (isCloudLoading) {
               </div>
             )}
 
+            {(form.type === 'income' || form.type === 'expense') && (
+              <div>
+                <label className="block text-white/60 mb-1">Kategori</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((c) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => setForm({ ...form, category: c.name })}
+                      className={`flex flex-col items-center gap-1 py-2 rounded-xl border text-[10px] transition-colors ${
+                        form.category === c.name
+                          ? 'bg-peach/20 border-peach text-peach'
+                          : 'bg-white/5 border-white/10 text-white/60'
+                      }`}
+                    >
+                      <Icon name={c.icon} className="w-5 h-5" />
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-white/60 mb-1">Keterangan</label>
               <input
@@ -1480,6 +1884,9 @@ if (isCloudLoading) {
           <h3 className="font-serif text-lg text-white mb-4">Rincian Transaksi</h3>
           <Detail label="Keterangan" value={selectedTransaction.title} />
           <Detail label="Tipe" value={typeLabel(selectedTransaction.type)} />
+          {getCategoryName(selectedTransaction) && (
+            <Detail label="Kategori" value={getCategoryName(selectedTransaction)} />
+          )}
           <Detail label="Rekening" value={selectedTransaction.wallet} />
           <Detail label="Tanggal" value={selectedTransaction.date} />
           <Detail label="Nominal" value={formatNumber(selectedTransaction.amount)} bold />
@@ -1745,7 +2152,7 @@ function Toast({ message, subtitle, type }) {
 function Modal({ children }) {
   return (
     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="glass-strong rounded-3xl w-full max-w-sm p-5">{children}</div>
+      <div className="glass-strong rounded-3xl w-full max-w-sm p-5 max-h-[88vh] overflow-y-auto">{children}</div>
     </div>
   );
 }
