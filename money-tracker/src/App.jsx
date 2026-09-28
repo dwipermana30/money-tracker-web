@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-const DEFAULT_ACCOUNTS = ['BCA', 'BRI', 'Dana', 'Gopay'];
+const DEFAULT_ACCOUNTS = ['BCA', 'BRI', 'Dana', 'Gopay','Cash'];
 const APP_PASSWORD = '3003';
 const FIRESTORE_COLLECTION = 'financeApps';
 const FIRESTORE_DOCUMENT_ID = 'main-data';
