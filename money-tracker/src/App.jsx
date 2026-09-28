@@ -47,6 +47,64 @@ const getPeriodRange = (period) => {
   }
 };
 
+const ICONS = {
+  list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
+  wallet: (
+    <>
+      <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+      <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+    </>
+  ),
+  chart: (
+    <>
+      <path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+    </>
+  ),
+  loan: (
+    <>
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
+    </>
+  ),
+  settings: (
+    <>
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />,
+  upload: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />,
+  trash: <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />,
+  chevron: <path d="m9 18 6-6-6-6" />,
+  transfer: <path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16" />,
+  arrowDown: <path d="M17 7 7 17M17 17H7V7" />,
+  arrowUp: <path d="M7 7h10v10M7 17 17 7" />,
+  inbox: (
+    <>
+      <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+    </>
+  )
+};
+
+function Icon({ name, className = 'w-5 h-5' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {ICONS[name]}
+    </svg>
+  );
+}
+
 export default function App() {
   const today = () => new Date().toISOString().split('T')[0];
 
@@ -207,17 +265,24 @@ useEffect(() => {
   };
 
   const typeColor = (type) => {
-    if (type === 'income') return 'text-green-600';
-    if (type === 'loanPayment') return 'text-purple-600';
-    if (type === 'transfer') return 'text-gray-500';
-    return 'text-red-500';
+    if (type === 'income') return 'text-emerald-300';
+    if (type === 'loanPayment') return 'text-violet-300';
+    if (type === 'transfer') return 'text-white/60';
+    return 'text-rose-300';
   };
 
-  const sideColor = (type) => {
-    if (type === 'income') return 'bg-green-500';
-    if (type === 'loanPayment') return 'bg-purple-500';
-    if (type === 'transfer') return 'bg-gray-400';
-    return 'bg-red-500';
+  const typeIcon = (type) => {
+    if (type === 'income') return 'arrowDown';
+    if (type === 'loanPayment') return 'loan';
+    if (type === 'transfer') return 'transfer';
+    return 'arrowUp';
+  };
+
+  const typeIconStyle = (type) => {
+    if (type === 'income') return 'bg-emerald-400/15 text-emerald-300';
+    if (type === 'loanPayment') return 'bg-violet-400/15 text-violet-300';
+    if (type === 'transfer') return 'bg-white/10 text-white/70';
+    return 'bg-rose-400/15 text-rose-300';
   };
 
   const signed = (t) => {
@@ -652,32 +717,32 @@ useEffect(() => {
 
 if (isCloudLoading) {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center max-w-md mx-auto shadow-xl px-6">
-      <div className="bg-white w-full rounded-2xl p-6 shadow-sm border border-gray-100 text-center">
-        <p className="font-semibold text-gray-700">Mengambil data cloud...</p>
-        <p className="text-xs text-gray-400 mt-2">{cloudStatus}</p>
+    <div className="min-h-screen app-bg flex items-center justify-center max-w-md mx-auto shadow-2xl px-6">
+      <div className="glass w-full rounded-3xl p-6 text-center">
+        <p className="font-semibold text-white/90">Mengambil data cloud...</p>
+        <p className="text-xs text-white/50 mt-2">{cloudStatus}</p>
       </div>
     </div>
   );
 }
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center max-w-md mx-auto shadow-xl px-6">
-        <div className="bg-white w-full rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h1 className="text-xl font-bold text-gray-800 text-center mb-1">Masuk</h1>
-          <p className="text-sm text-gray-400 text-center mb-6">
+      <div className="min-h-screen app-bg flex items-center justify-center max-w-md mx-auto shadow-2xl px-6">
+        <div className="glass w-full rounded-3xl p-6">
+          <h1 className="font-serif text-2xl text-white text-center mb-1">Masuk</h1>
+          <p className="text-sm text-white/50 text-center mb-6">
             Masukkan password untuk membuka aplikasi
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-gray-500 text-xs mb-1">Password</label>
+              <label className="block text-white/60 text-xs mb-1">Password</label>
               <input
                 type="password"
                 required
                 autoFocus
                 placeholder="Masukkan password"
-                className="w-full p-3 border rounded-xl focus:outline-none focus:border-[#2196f3]"
+                className="field"
                 value={passwordInput}
                 onChange={(e) => {
                   setPasswordInput(e.target.value);
@@ -685,12 +750,12 @@ if (isCloudLoading) {
                 }}
               />
 
-              {passwordError && <p className="text-red-500 text-xs mt-2">{passwordError}</p>}
+              {passwordError && <p className="text-rose-300 text-xs mt-2">{passwordError}</p>}
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#2196f3] text-white rounded-xl font-semibold active:scale-95 transition-transform"
+              className="w-full py-3 bg-peach text-pine-900 rounded-xl font-semibold active:scale-95 transition-transform"
             >
               Masuk
             </button>
@@ -701,30 +766,34 @@ if (isCloudLoading) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between max-w-md mx-auto shadow-xl relative pb-20 select-none overflow-hidden">
+    <div className="min-h-screen app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden">
       {toast && <Toast key={toast.id} {...toast} />}
-      <header className="bg-[#2196f3] text-white p-4 text-center font-semibold text-base shadow-sm flex justify-between items-center">
+      <header className="px-4 pt-5 pb-3 flex justify-between items-center">
         {activeTab === 'report' ? (
           <>
-            <span className="w-6"></span>
-            <span>Report</span>
-            <button onClick={downloadReportExcel} className="text-lg">
-              ↓
+            <span className="w-9"></span>
+            <span className="font-serif text-xl">Report</span>
+            <button
+              type="button"
+              onClick={downloadReportExcel}
+              className="w-9 h-9 rounded-full glass flex items-center justify-center text-peach active:scale-95 transition-transform"
+            >
+              <Icon name="download" className="w-4 h-4" />
             </button>
           </>
         ) : (
           <>
-            <span className="w-6"></span>
-            <span className="capitalize">{activeTab}</span>
+            <span className="w-9"></span>
+            <span className="font-serif text-xl capitalize">{activeTab}</span>
             <button
               type="button"
               onClick={() => {
                 setActiveTab('settings');
                 setIsFabMenuOpen(false);
               }}
-              className="text-lg"
+              className="w-9 h-9 rounded-full glass flex items-center justify-center text-peach active:scale-95 transition-transform"
             >
-              ⚙
+              <Icon name="settings" className="w-4 h-4" />
             </button>
           </>
         )}
@@ -733,8 +802,8 @@ if (isCloudLoading) {
       <main className="flex-1 overflow-y-auto">
         {activeTab === 'transactions' && (
           <div className="p-4">
-            <div className="mb-3">
-              <label className="block text-gray-500 text-xs mb-1">Periode</label>
+            <div className="mb-4">
+              <label className="block text-white/60 text-xs mb-1">Periode</label>
               <select
                 value={period}
                 onChange={(e) => {
@@ -746,7 +815,7 @@ if (isCloudLoading) {
                   }
                   setPeriod(next);
                 }}
-                className="w-full p-2 border rounded-lg bg-white text-sm focus:outline-none focus:border-[#2196f3]"
+                className="field text-sm"
               >
                 {PERIOD_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -758,58 +827,59 @@ if (isCloudLoading) {
               {period === 'custom' ? (
                 <div className="grid grid-cols-2 gap-3 text-xs mt-3">
                   <div>
-                    <label className="block text-gray-500 mb-1">Start Date</label>
+                    <label className="block text-white/60 mb-1">Start Date</label>
                     <input
                       type="date"
                       value={txStartDate}
                       onChange={(e) => setTxStartDate(e.target.value)}
-                      className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
+                      className="field"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-500 mb-1">End Date</label>
+                    <label className="block text-white/60 mb-1">End Date</label>
                     <input
                       type="date"
                       value={txEndDate}
                       onChange={(e) => setTxEndDate(e.target.value)}
-                      className="w-full p-2 border rounded-lg bg-white focus:outline-none focus:border-[#2196f3]"
+                      className="field"
                     />
                   </div>
                 </div>
               ) : (
                 rangeStart && (
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-white/50 mt-1.5">
                     {formatDateLabel(rangeStart)} - {formatDateLabel(rangeEnd)}
                   </p>
                 )
               )}
 
               {isTxRangeInvalid && (
-                <p className="text-[11px] text-red-500 mt-1">
+                <p className="text-[11px] text-rose-300 mt-1.5">
                   Start Date tidak boleh lebih besar dari End Date
                 </p>
               )}
             </div>
 
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between text-center mb-4">
-              <div>
-                <p className="text-xs text-gray-400">Income</p>
-                <p className="font-bold text-green-600">{formatNumber(periodIncome)}</p>
-              </div>
-              <div className="border-r border-gray-100"></div>
-              <div>
-                <p className="text-xs text-gray-400">Expenses</p>
-                <p className="font-bold text-red-500">{formatNumber(periodExpenses)}</p>
-              </div>
-              <div className="border-r border-gray-100"></div>
-              <div>
-                <p className="text-xs text-gray-400">Balance</p>
-                <p className="font-bold text-blue-600">{formatNumber(periodBalance)}</p>
+            <div className="glass rounded-3xl p-5 mb-5">
+              <p className="text-xs text-white/60 text-center">Balance</p>
+              <p className="font-serif text-3xl text-center mt-1">{formatNumber(periodBalance)}</p>
+
+              <div className="flex text-center mt-4 pt-4 border-t border-white/10">
+                <div className="flex-1">
+                  <p className="text-xs text-white/60">Income</p>
+                  <p className="font-semibold text-emerald-300">{formatNumber(periodIncome)}</p>
+                </div>
+                <div className="border-r border-white/10"></div>
+                <div className="flex-1">
+                  <p className="text-xs text-white/60">Expenses</p>
+                  <p className="font-semibold text-rose-300">{formatNumber(periodExpenses)}</p>
+                </div>
               </div>
             </div>
 
             {periodTransactions.length === 0 ? (
-              <div className="h-80 flex items-center justify-center text-gray-300 text-sm">
+              <div className="h-64 flex flex-col items-center justify-center gap-3 text-white/30 text-sm">
+                <Icon name="inbox" className="w-10 h-10" />
                 Tidak ada data
               </div>
             ) : (
@@ -819,14 +889,20 @@ if (isCloudLoading) {
                     key={t.id}
                     type="button"
                     onClick={() => setSelectedTransaction(t)}
-                    className="w-full text-left bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex justify-between items-center relative"
+                    className="glass w-full text-left rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition-transform"
                   >
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${sideColor(t.type)}`}></div>
-                    <div className="pl-2">
-                      <p className="font-semibold text-gray-800 text-sm">{t.title}</p>
-                      <p className="text-xs text-gray-400">{t.wallet} - {t.date}</p>
+                    <div
+                      className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${typeIconStyle(t.type)}`}
+                    >
+                      <Icon name={typeIcon(t.type)} className="w-5 h-5" />
                     </div>
-                    <div className={`font-bold text-sm ${typeColor(t.type)}`}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{t.title}</p>
+                      <p className="text-xs text-white/50">
+                        {t.wallet} · {formatDateLabel(t.date)}
+                      </p>
+                    </div>
+                    <div className={`font-semibold text-sm whitespace-nowrap ${typeColor(t.type)}`}>
                       {signed(t)}
                       {formatNumber(t.amount)}
                     </div>
@@ -839,12 +915,12 @@ if (isCloudLoading) {
 
         {activeTab === 'wallet' && (
           <div className="p-4 space-y-3">
-            <div className="bg-white p-4 rounded-xl shadow-sm border flex justify-between text-sm">
-              <span className="font-semibold text-gray-700">Total Balance</span>
-              <span className="font-bold text-gray-900">{formatNumber(totalBalance)}</span>
+            <div className="glass p-4 rounded-2xl flex justify-between text-sm">
+              <span className="font-semibold text-white/90">Total Balance</span>
+              <span className="font-bold text-white">{formatNumber(totalBalance)}</span>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border divide-y text-sm">
+            <div className="glass rounded-2xl divide-y divide-white/10 text-sm">
               {accounts.map((account) => (
                 <button
                   key={account}
@@ -852,8 +928,8 @@ if (isCloudLoading) {
                   onClick={() => setSelectedAccount(account)}
                   className="w-full p-4 flex justify-between text-left"
                 >
-                  <span className="text-gray-700">{account}</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-white/90">{account}</span>
+                  <span className="font-semibold text-white">
                     {formatNumber(getWalletBalance(account))}
                   </span>
                 </button>
@@ -864,47 +940,47 @@ if (isCloudLoading) {
 
         {activeTab === 'report' && (
           <div>
-            <div className="bg-white border-b border-gray-200 text-xs font-semibold">
-              <button className="w-full py-3 text-center border-b-2 border-[#2196f3] text-[#2196f3]">
+            <div className="border-b border-white/10 text-xs font-semibold">
+              <button className="w-full py-3 text-center border-b-2 border-peach text-peach">
                 Chart
               </button>
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <p className="text-center text-xs font-semibold text-gray-500 mb-3">
+              <div className="glass rounded-2xl p-4">
+                <p className="text-center text-xs font-semibold text-white/60 mb-3">
                   {formatDateLabel(startDate)} - {formatDateLabel(endDate)}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block text-gray-500 mb-1">Start Date</label>
+                    <label className="block text-white/60 mb-1">Start Date</label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full p-2 border rounded-lg bg-white focus:outline-none"
+                      className="field"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-500 mb-1">End Date</label>
+                    <label className="block text-white/60 mb-1">End Date</label>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full p-2 border rounded-lg bg-white focus:outline-none"
+                      className="field"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm flex justify-between items-center text-sm">
-                <span className="font-semibold text-gray-700">Show Graphs</span>
+              <div className="p-4 glass rounded-2xl flex justify-between items-center text-sm">
+                <span className="font-semibold text-white/90">Show Graphs</span>
                 <button
                   onClick={() => setShowGraph(!showGraph)}
                   className={`w-11 h-6 flex items-center rounded-full p-1 duration-300 ${
-                    showGraph ? 'bg-[#2196f3]' : 'bg-gray-300'
+                    showGraph ? 'bg-peach' : 'bg-white/20'
                   }`}
                 >
                   <div
@@ -919,13 +995,14 @@ if (isCloudLoading) {
                 <div className="flex justify-center items-center my-6">
                   <div className="relative w-40 h-40">
                     <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4.5" />
                       <circle
                         onClick={() => setActiveDetailCategory('income')}
                         cx="18"
                         cy="18"
                         r="15.915"
                         fill="none"
-                        stroke="#4caf50"
+                        stroke="#34d399"
                         strokeWidth="4.5"
                         strokeDasharray={`${incomePercent} ${100 - incomePercent}`}
                         strokeDashoffset="0"
@@ -936,60 +1013,60 @@ if (isCloudLoading) {
                         cy="18"
                         r="15.915"
                         fill="none"
-                        stroke="#e53935"
+                        stroke="#fb7185"
                         strokeWidth="4.5"
                         strokeDasharray={`${expensePercent} ${100 - expensePercent}`}
                         strokeDashoffset={`-${incomePercent}`}
                       />
                     </svg>
-                    <div className="absolute inset-5 bg-white rounded-full flex flex-col justify-center items-center">
-                      <p className="text-[10px] text-gray-400 font-medium">Selisih</p>
-                      <p className="text-xs font-bold text-gray-700">{formatNumber(reportBalance)}</p>
+                    <div className="absolute inset-5 bg-pine-800 rounded-full flex flex-col justify-center items-center">
+                      <p className="text-[10px] text-white/50 font-medium">Selisih</p>
+                      <p className="text-xs font-bold text-white/90">{formatNumber(reportBalance)}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm space-y-2 text-sm text-gray-700">
+              <div className="glass p-2 rounded-2xl space-y-2 text-sm text-white/90">
                 <div
                   onClick={() =>
                     setActiveDetailCategory(activeDetailCategory === 'income' ? null : 'income')
                   }
-                  className="flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-gray-50 border-b border-gray-50"
+                  className="flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-white/5 border-b border-white/5"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="bg-[#4caf50] text-white text-[11px] font-bold px-2 py-0.5 rounded min-w-[38px] text-center">
+                    <div className="bg-emerald-500 text-white text-[11px] font-bold px-2 py-0.5 rounded min-w-[38px] text-center">
                       {incomePercent}%
                     </div>
                     <span>Income</span>
                   </div>
-                  <span className="font-bold text-gray-800">{formatNumber(reportIncome)}</span>
+                  <span className="font-bold text-white">{formatNumber(reportIncome)}</span>
                 </div>
 
                 <div
                   onClick={() =>
                     setActiveDetailCategory(activeDetailCategory === 'expense' ? null : 'expense')
                   }
-                  className="flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-gray-50"
+                  className="flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-white/5"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="bg-[#e53935] text-white text-[11px] font-bold px-2 py-0.5 rounded min-w-[38px] text-center">
+                    <div className="bg-rose-500 text-white text-[11px] font-bold px-2 py-0.5 rounded min-w-[38px] text-center">
                       {expensePercent}%
                     </div>
                     <span>Expenses</span>
                   </div>
-                  <span className="font-bold text-gray-800">{formatNumber(reportExpenses)}</span>
+                  <span className="font-bold text-white">{formatNumber(reportExpenses)}</span>
                 </div>
               </div>
 
               {activeDetailCategory === 'income' && (
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                  <h3 className="font-semibold text-green-600 mb-3">Detail Income</h3>
+                <div className="glass rounded-2xl p-4">
+                  <h3 className="font-semibold text-emerald-300 mb-3">Detail Income</h3>
                   {Object.entries(incomeBreakdown).length === 0 ? (
-                    <p className="text-sm text-gray-400">Tidak ada data income</p>
+                    <p className="text-sm text-white/50">Tidak ada data income</p>
                   ) : (
                     Object.entries(incomeBreakdown).map(([title, amount]) => (
-                      <div key={title} className="flex justify-between py-2 border-b border-gray-100">
+                      <div key={title} className="flex justify-between py-2 border-b border-white/10">
                         <span>{title}</span>
                         <span className="font-semibold">{formatNumber(amount)}</span>
                       </div>
@@ -999,13 +1076,13 @@ if (isCloudLoading) {
               )}
 
               {activeDetailCategory === 'expense' && (
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                  <h3 className="font-semibold text-red-500 mb-3">Detail Expense</h3>
+                <div className="glass rounded-2xl p-4">
+                  <h3 className="font-semibold text-rose-300 mb-3">Detail Expense</h3>
                   {Object.entries(expenseBreakdown).length === 0 ? (
-                    <p className="text-sm text-gray-400">Tidak ada data expense</p>
+                    <p className="text-sm text-white/50">Tidak ada data expense</p>
                   ) : (
                     Object.entries(expenseBreakdown).map(([title, amount]) => (
-                      <div key={title} className="flex justify-between py-2 border-b border-gray-100">
+                      <div key={title} className="flex justify-between py-2 border-b border-white/10">
                         <span>{title}</span>
                         <span className="font-semibold">{formatNumber(amount)}</span>
                       </div>
@@ -1019,13 +1096,13 @@ if (isCloudLoading) {
 
         {activeTab === 'loan' && (
           <div className="p-4 space-y-3">
-            <div className="bg-white p-4 rounded-xl shadow-sm border flex justify-between text-sm">
-              <span className="font-semibold text-gray-700">Total Sisa Pinjaman</span>
-              <span className="font-bold text-red-500">{formatNumber(totalLoanRemaining)}</span>
+            <div className="glass p-4 rounded-2xl flex justify-between text-sm">
+              <span className="font-semibold text-white/90">Total Sisa Pinjaman</span>
+              <span className="font-bold text-rose-300">{formatNumber(totalLoanRemaining)}</span>
             </div>
 
             {loans.length === 0 ? (
-              <div className="h-80 flex items-center justify-center text-gray-300 text-sm">
+              <div className="h-80 flex items-center justify-center text-white/30 text-sm">
                 Tidak ada data pinjaman.
               </div>
             ) : (
@@ -1035,22 +1112,22 @@ if (isCloudLoading) {
                     key={loan.id}
                     type="button"
                     onClick={() => setSelectedLoan(loan)}
-                    className="w-full text-left bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                    className="glass w-full text-left rounded-2xl p-4"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold text-gray-800 text-sm">{loan.name}</p>
-                        <p className="text-xs text-gray-400">{loan.date}</p>
+                        <p className="font-semibold text-white text-sm">{loan.name}</p>
+                        <p className="text-xs text-white/50">{loan.date}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-gray-400">Sisa</p>
-                        <p className="font-bold text-red-500">{formatNumber(loan.remaining)}</p>
+                        <p className="text-xs text-white/50">Sisa</p>
+                        <p className="font-bold text-rose-300">{formatNumber(loan.remaining)}</p>
                       </div>
                     </div>
 
-                    <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#2196f3]"
+                        className="h-full bg-peach"
                         style={{
                           width: `${
                             loan.amount > 0
@@ -1061,7 +1138,7 @@ if (isCloudLoading) {
                       ></div>
                     </div>
 
-                    <div className="flex justify-between text-xs text-gray-400 mt-2">
+                    <div className="flex justify-between text-xs text-white/50 mt-2">
                       <span>Total {formatNumber(loan.amount)}</span>
                       <span>Terbayar {formatNumber(loan.amount - loan.remaining)}</span>
                     </div>
@@ -1073,37 +1150,43 @@ if (isCloudLoading) {
         )}
 
         {activeTab === 'settings' && (
-          <div className="p-4 space-y-4 text-sm text-gray-700 bg-white min-h-full">
-            <div className="flex justify-between items-center py-2 border-b">
-              <div className="flex justify-between items-center py-2 border-b">
-  <span>Status Cloud</span>
-  <span className="text-xs text-gray-400">{cloudStatus}</span>
-</div>
-              <span>Show Decimals</span>
-              <input
-                type="checkbox"
-                checked={showDecimals}
-                onChange={(e) => setShowDecimals(e.target.checked)}
-              />
+          <div className="p-4 space-y-4 text-sm">
+            <div className="glass rounded-2xl divide-y divide-white/10">
+              <div className="flex justify-between items-center p-4">
+                <span>Status Cloud</span>
+                <span className="text-xs text-white/50">{cloudStatus}</span>
+              </div>
+
+              <label className="flex justify-between items-center p-4 cursor-pointer">
+                <span>Show Decimals</span>
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 accent-[#f2a97e]"
+                  checked={showDecimals}
+                  onChange={(e) => setShowDecimals(e.target.checked)}
+                />
+              </label>
             </div>
 
-            <button
-              type="button"
-              onClick={downloadBackup}
-              className="w-full flex justify-between items-center py-2 border-b text-left"
-            >
-              <span>Back Up</span>
-              <span className="text-[#2196f3]">↓</span>
-            </button>
+            <div className="glass rounded-2xl divide-y divide-white/10">
+              <button
+                type="button"
+                onClick={downloadBackup}
+                className="w-full flex justify-between items-center p-4 text-left"
+              >
+                <span>Back Up</span>
+                <Icon name="download" className="w-4 h-4 text-peach" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => backupInputRef.current?.click()}
-              className="w-full flex justify-between items-center py-2 border-b text-left"
-            >
-              <span>Import Back Up</span>
-              <span className="text-[#2196f3]">↑</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => backupInputRef.current?.click()}
+                className="w-full flex justify-between items-center p-4 text-left"
+              >
+                <span>Import Back Up</span>
+                <Icon name="upload" className="w-4 h-4 text-peach" />
+              </button>
+            </div>
 
             <input
               ref={backupInputRef}
@@ -1116,10 +1199,10 @@ if (isCloudLoading) {
             <button
               type="button"
               onClick={() => setIsClearDataModalOpen(true)}
-              className="w-full flex justify-between items-center py-2 border-b text-left"
+              className="glass w-full rounded-2xl flex justify-between items-center p-4 text-left text-rose-300"
             >
               <span>Clear Data</span>
-              <span className="text-red-500">›</span>
+              <Icon name="trash" className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -1131,7 +1214,7 @@ if (isCloudLoading) {
             <button
               type="button"
               onClick={() => setIsFabMenuOpen(false)}
-              className="absolute inset-0 bg-white/70 z-30"
+              className="absolute inset-0 bg-pine-950/80 backdrop-blur-sm z-30"
             />
           )}
 
@@ -1140,7 +1223,7 @@ if (isCloudLoading) {
               <FabItem
                 open={isFabMenuOpen}
                 label="Tambah Rekening"
-                color="bg-[#2196f3]"
+                color="bg-teal-500"
                 icon="+"
                 onClick={() => {
                   setEditingAccountName('');
@@ -1153,7 +1236,7 @@ if (isCloudLoading) {
               <FabItem
                 open={isFabMenuOpen}
                 label="Tambah Pinjaman"
-                color="bg-[#ff5f67]"
+                color="bg-rose-500"
                 icon="+"
                 onClick={() => {
                   setEditingLoanId(null);
@@ -1164,10 +1247,10 @@ if (isCloudLoading) {
               />
             ) : (
               [
-                ['Transfer', 'bg-gray-400', '⇄', 'transfer'],
-                ['Income', 'bg-[#ffb74d]', '$', 'income'],
-                ['Expense', 'bg-[#ff5f67]', '-', 'expense'],
-                ['Pinjaman', 'bg-purple-500', 'P', 'loanPayment']
+                ['Transfer', 'bg-white/25', 'transfer', 'transfer'],
+                ['Income', 'bg-emerald-500', 'arrowDown', 'income'],
+                ['Expense', 'bg-rose-500', 'arrowUp', 'expense'],
+                ['Pinjaman', 'bg-violet-500', 'loan', 'loanPayment']
               ].map(([label, color, icon, type], index) => (
                 <FabItem
                   key={label}
@@ -1184,7 +1267,7 @@ if (isCloudLoading) {
             <button
               type="button"
               onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-              className={`w-14 h-14 bg-[#2196f3] text-white rounded-full flex items-center justify-center text-3xl font-light shadow-lg active:scale-95 transition-transform duration-300 ${
+              className={`w-14 h-14 bg-peach text-pine-900 rounded-full flex items-center justify-center text-3xl font-light shadow-lg active:scale-95 transition-transform duration-300 ${
                 isFabMenuOpen ? 'rotate-45' : 'rotate-0'
               }`}
             >
@@ -1196,17 +1279,17 @@ if (isCloudLoading) {
 
       {transactionModalOpen && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">
+          <h3 className="font-serif text-lg text-white mb-4">
             {editingTransactionId ? 'Edit' : 'Tambah'} {typeLabel(form.type)}
           </h3>
 
           <form onSubmit={saveTransaction} className="space-y-3 text-xs">
             {form.type === 'loanPayment' && (
               <div>
-                <label className="block text-gray-500 mb-1">Pilih Pinjaman</label>
+                <label className="block text-white/60 mb-1">Pilih Pinjaman</label>
                 <select
                   required
-                  className="w-full p-2 border rounded-lg bg-white"
+                  className="field"
                   value={form.loanId}
                   onChange={(e) => setForm({ ...form, loanId: e.target.value })}
                 >
@@ -1223,35 +1306,35 @@ if (isCloudLoading) {
             )}
 
             <div>
-              <label className="block text-gray-500 mb-1">Keterangan</label>
+              <label className="block text-white/60 mb-1">Keterangan</label>
               <input
                 type="text"
                 placeholder="Contoh: Gaji, Makan Siang, Cicilan"
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 mb-1">Nominal (Rp)</label>
+              <label className="block text-white/60 mb-1">Nominal (Rp)</label>
               <input
                 type="number"
                 required
                 placeholder="0"
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 mb-1">
+              <label className="block text-white/60 mb-1">
                 {form.type === 'loanPayment' ? 'Rekening Pembayaran' : 'Rekening'}
               </label>
               <select
                 required
-                className="w-full p-2 border rounded-lg bg-white"
+                className="field"
                 value={form.wallet}
                 onChange={(e) => setForm({ ...form, wallet: e.target.value })}
               >
@@ -1264,11 +1347,11 @@ if (isCloudLoading) {
             </div>
 
             <div>
-              <label className="block text-gray-500 mb-1">Tanggal</label>
+              <label className="block text-white/60 mb-1">Tanggal</label>
               <input
                 type="date"
                 required
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
               />
@@ -1281,11 +1364,11 @@ if (isCloudLoading) {
                   setTransactionModalOpen(false);
                   resetTransactionForm();
                 }}
-                className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium"
+                className="flex-1 py-2 bg-white/10 text-white/80 rounded-lg font-medium"
               >
                 Batal
               </button>
-              <button type="submit" className="flex-1 py-2 bg-[#2196f3] text-white rounded-lg font-medium">
+              <button type="submit" className="flex-1 py-2 bg-peach text-pine-900 rounded-lg font-medium">
                 Simpan
               </button>
             </div>
@@ -1295,18 +1378,18 @@ if (isCloudLoading) {
 
       {accountModalOpen && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">
+          <h3 className="font-serif text-lg text-white mb-4">
             {editingAccountName ? 'Edit Rekening' : 'Tambah Rekening'}
           </h3>
 
           <form onSubmit={saveAccount} className="space-y-3 text-xs">
             <div>
-              <label className="block text-gray-500 mb-1">Nama Rekening</label>
+              <label className="block text-white/60 mb-1">Nama Rekening</label>
               <input
                 type="text"
                 required
                 placeholder="Contoh: Mandiri, Cash"
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
               />
@@ -1319,11 +1402,11 @@ if (isCloudLoading) {
                   setAccountModalOpen(false);
                   setEditingAccountName('');
                 }}
-                className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium"
+                className="flex-1 py-2 bg-white/10 text-white/80 rounded-lg font-medium"
               >
                 Batal
               </button>
-              <button type="submit" className="flex-1 py-2 bg-[#2196f3] text-white rounded-lg font-medium">
+              <button type="submit" className="flex-1 py-2 bg-peach text-pine-900 rounded-lg font-medium">
                 Simpan
               </button>
             </div>
@@ -1333,41 +1416,41 @@ if (isCloudLoading) {
 
       {loanModalOpen && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">
+          <h3 className="font-serif text-lg text-white mb-4">
             {editingLoanId ? 'Edit Pinjaman' : 'Tambah Pinjaman'}
           </h3>
 
           <form onSubmit={saveLoan} className="space-y-3 text-xs">
             <div>
-              <label className="block text-gray-500 mb-1">Nama Pinjaman</label>
+              <label className="block text-white/60 mb-1">Nama Pinjaman</label>
               <input
                 type="text"
                 required
                 placeholder="Contoh: Pinjaman Motor"
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={loanForm.name}
                 onChange={(e) => setLoanForm({ ...loanForm, name: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 mb-1">Total Pinjaman (Rp)</label>
+              <label className="block text-white/60 mb-1">Total Pinjaman (Rp)</label>
               <input
                 type="number"
                 required
                 placeholder="0"
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={loanForm.amount}
                 onChange={(e) => setLoanForm({ ...loanForm, amount: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 mb-1">Tanggal</label>
+              <label className="block text-white/60 mb-1">Tanggal</label>
               <input
                 type="date"
                 required
-                className="w-full p-2 border rounded-lg"
+                className="field"
                 value={loanForm.date}
                 onChange={(e) => setLoanForm({ ...loanForm, date: e.target.value })}
               />
@@ -1380,11 +1463,11 @@ if (isCloudLoading) {
                   setLoanModalOpen(false);
                   setEditingLoanId(null);
                 }}
-                className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium"
+                className="flex-1 py-2 bg-white/10 text-white/80 rounded-lg font-medium"
               >
                 Batal
               </button>
-              <button type="submit" className="flex-1 py-2 bg-[#2196f3] text-white rounded-lg font-medium">
+              <button type="submit" className="flex-1 py-2 bg-peach text-pine-900 rounded-lg font-medium">
                 Simpan
               </button>
             </div>
@@ -1394,7 +1477,7 @@ if (isCloudLoading) {
 
       {selectedTransaction && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">Rincian Transaksi</h3>
+          <h3 className="font-serif text-lg text-white mb-4">Rincian Transaksi</h3>
           <Detail label="Keterangan" value={selectedTransaction.title} />
           <Detail label="Tipe" value={typeLabel(selectedTransaction.type)} />
           <Detail label="Rekening" value={selectedTransaction.wallet} />
@@ -1411,7 +1494,7 @@ if (isCloudLoading) {
 
       {selectedAccount && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">Rincian Rekening</h3>
+          <h3 className="font-serif text-lg text-white mb-4">Rincian Rekening</h3>
           <Detail label="Nama Rekening" value={selectedAccount} />
           <Detail label="Saldo" value={formatNumber(getWalletBalance(selectedAccount))} bold />
           <Detail
@@ -1434,7 +1517,7 @@ if (isCloudLoading) {
 
       {selectedLoan && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-4 text-base">Rincian Pinjaman</h3>
+          <h3 className="font-serif text-lg text-white mb-4">Rincian Pinjaman</h3>
           <Detail label="Nama" value={selectedLoan.name} />
           <Detail label="Tanggal" value={selectedLoan.date} />
           <Detail label="Total" value={formatNumber(selectedLoan.amount)} />
@@ -1460,21 +1543,21 @@ if (isCloudLoading) {
 
       {isClearDataModalOpen && (
         <Modal>
-          <h3 className="font-bold text-gray-800 mb-2 text-base">Clear Data</h3>
-          <p className="text-sm text-gray-500 mb-4">Apakah anda yakin akan clear data?</p>
+          <h3 className="font-serif text-lg text-white mb-2">Clear Data</h3>
+          <p className="text-sm text-white/60 mb-4">Apakah anda yakin akan clear data?</p>
 
           <div className="flex space-x-2">
             <button
               type="button"
               onClick={() => setIsClearDataModalOpen(false)}
-              className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium"
+              className="flex-1 py-2 bg-white/10 text-white/80 rounded-lg font-medium"
             >
               Tidak
             </button>
             <button
               type="button"
               onClick={clearData}
-              className="flex-1 py-2 bg-red-500 text-white rounded-lg font-medium"
+              className="flex-1 py-2 bg-rose-500/90 text-white rounded-lg font-medium"
             >
               Ya
             </button>
@@ -1482,25 +1565,29 @@ if (isCloudLoading) {
         </Modal>
       )}
 
-      <footer className="bg-white border-t border-gray-200 absolute bottom-0 left-0 right-0 h-16 flex justify-around items-center text-[10px] text-gray-400 z-30">
+      <footer className="glass-nav absolute bottom-0 left-0 right-0 h-16 flex justify-around items-stretch text-[10px] text-white/50 z-30">
         {[
-          ['transactions', '▤', 'Transactions'],
-          ['wallet', '▣', 'Wallet'],
-          ['report', '▥', 'Report'],
-          ['loan', '□', 'Loan'],
-          ['settings', '⚙', 'Settings']
+          ['transactions', 'list', 'Transactions'],
+          ['wallet', 'wallet', 'Wallet'],
+          ['report', 'chart', 'Report'],
+          ['loan', 'loan', 'Loan'],
+          ['settings', 'settings', 'Settings']
         ].map(([tab, icon, label]) => (
           <button
             key={tab}
+            type="button"
             onClick={() => {
               setActiveTab(tab);
               setIsFabMenuOpen(false);
             }}
-            className={`flex flex-col items-center flex-1 py-1 ${
-              activeTab === tab ? 'text-[#2196f3] font-semibold' : ''
+            className={`relative flex flex-col items-center justify-center gap-1 flex-1 transition-colors ${
+              activeTab === tab ? 'text-peach font-semibold' : ''
             }`}
           >
-            <span>{icon}</span>
+            {activeTab === tab && (
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full bg-peach shadow-[0_0_10px_#f2a97e]"></span>
+            )}
+            <Icon name={icon} className="w-5 h-5" />
             <span>{label}</span>
           </button>
         ))}
@@ -1520,7 +1607,7 @@ function FabItem({ open, label, color, icon, onClick, delay = 0 }) {
       <button
         type="button"
         onClick={onClick}
-        className="bg-white text-gray-800 font-bold px-4 py-2 rounded-lg shadow-md border border-gray-100"
+        className="glass-strong text-white font-semibold px-4 py-2 rounded-xl text-sm"
       >
         {label}
       </button>
@@ -1530,7 +1617,7 @@ function FabItem({ open, label, color, icon, onClick, delay = 0 }) {
         onClick={onClick}
         className={`w-12 h-12 ${color} text-white rounded-full flex items-center justify-center text-xl font-semibold shadow-lg active:scale-95 transition-transform`}
       >
-        {icon}
+        {ICONS[icon] ? <Icon name={icon} className="w-5 h-5" /> : icon}
       </button>
     </div>
   );
@@ -1538,7 +1625,7 @@ function FabItem({ open, label, color, icon, onClick, delay = 0 }) {
 
 function Detail({ label, value, bold = false }) {
   return (
-    <div className="flex justify-between text-sm text-gray-700 py-1 gap-3">
+    <div className="flex justify-between text-sm text-white/90 py-1 gap-3">
       <span>{label}</span>
       <span className={`${bold ? 'font-bold' : 'font-semibold'} text-right`}>{value}</span>
     </div>
@@ -1551,21 +1638,21 @@ function ActionButtons({ onClose, onEdit, onDelete }) {
       <button
         type="button"
         onClick={onClose}
-        className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium"
+        className="flex-1 py-2 bg-white/10 text-white/80 rounded-lg font-medium"
       >
         Tutup
       </button>
       <button
         type="button"
         onClick={onEdit}
-        className="flex-1 py-2 bg-[#2196f3] text-white rounded-lg font-medium"
+        className="flex-1 py-2 bg-peach text-pine-900 rounded-lg font-medium"
       >
         Edit
       </button>
       <button
         type="button"
         onClick={onDelete}
-        className="flex-1 py-2 bg-red-500 text-white rounded-lg font-medium"
+        className="flex-1 py-2 bg-rose-500/90 text-white rounded-lg font-medium"
       >
         Hapus
       </button>
@@ -1578,7 +1665,7 @@ function Toast({ message, subtitle, type }) {
   const isWelcome = type === 'welcome';
   const isDelete = type === 'delete';
 
-  const circleColor = isSuccess ? 'bg-green-500' : isWelcome ? 'bg-[#2196f3]' : 'bg-red-500';
+  const circleColor = isSuccess ? 'bg-emerald-400' : isWelcome ? 'bg-peach' : 'bg-rose-400';
 
   return (
     <div className="fixed inset-x-0 top-4 z-[60] flex justify-center px-4 pointer-events-none">
@@ -1607,7 +1694,7 @@ function Toast({ message, subtitle, type }) {
       `}</style>
 
       <div
-        className="bg-white rounded-2xl shadow-xl border border-gray-100 px-4 py-3 flex items-center gap-3 min-w-[220px] max-w-sm"
+        className="glass-strong rounded-2xl px-4 py-3 flex items-center gap-3 min-w-[220px] max-w-sm"
         style={{
           animation: 'toast-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, toast-out 0.3s ease-in 2s forwards'
         }}
@@ -1647,8 +1734,8 @@ function Toast({ message, subtitle, type }) {
         </div>
 
         <div className="min-w-0">
-          <p className="font-semibold text-gray-800 text-sm leading-tight">{message}</p>
-          {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+          <p className="font-semibold text-white text-sm leading-tight">{message}</p>
+          {subtitle && <p className="text-xs text-white/50 mt-0.5">{subtitle}</p>}
         </div>
       </div>
     </div>
@@ -1657,8 +1744,8 @@ function Toast({ message, subtitle, type }) {
 
 function Modal({ children }) {
   return (
-    <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-5 shadow-xl">{children}</div>
+    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="glass-strong rounded-3xl w-full max-w-sm p-5">{children}</div>
     </div>
   );
 }
