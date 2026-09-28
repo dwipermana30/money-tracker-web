@@ -114,6 +114,17 @@ const [cloudStatus, setCloudStatus] = useState('Menghubungkan ke Firestore...');
     loanId: '',
     date: today()
   });
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const showToast = (message, type = 'success', subtitle = '') => {
+    clearTimeout(toastTimer.current);
+    setToast({ id: Date.now(), message, type, subtitle });
+    toastTimer.current = setTimeout(() => setToast(null), 2300);
+  };
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
 useEffect(() => {
   const loadCloudData = async () => {
     try {
@@ -290,6 +301,7 @@ useEffect(() => {
     if (passwordInput === APP_PASSWORD) {
       setIsLoggedIn(true);
       setPasswordError('');
+      showToast('Welcome', 'welcome', 'Selamat datang kembali');
     } else {
       setPasswordError('Password salah');
     }
@@ -351,12 +363,12 @@ useEffect(() => {
     const selectedLoan = loanList.find((loan) => String(loan.id) === String(newTransaction.loanId));
 
     if (!selectedLoan) {
-      alert('Pilih pinjaman terlebih dahulu');
+      showToast('Pilih pinjaman terlebih dahulu', 'error');
       return null;
     }
 
     if (newTransaction.amount > selectedLoan.remaining) {
-      alert('Nominal pembayaran melebihi sisa pinjaman');
+      showToast('Nominal pembayaran melebihi sisa pinjaman', 'error');
       return null;
     }
 
@@ -372,7 +384,7 @@ useEffect(() => {
 
     const amount = parseFloat(form.amount) || 0;
     if (amount <= 0) {
-      alert('Nominal harus lebih dari 0');
+      showToast('Nominal harus lebih dari 0', 'error');
       return;
     }
 
@@ -409,6 +421,7 @@ useEffect(() => {
     }
 
     setLoans(updatedLoans);
+    showToast(editingTransactionId ? 'Transaksi diperbarui' : 'Transaksi terinput', 'success');
     setTransactionModalOpen(false);
     resetTransactionForm();
   };
@@ -426,6 +439,7 @@ useEffect(() => {
 
     setTransactions(transactions.filter((t) => t.id !== transaction.id));
     setSelectedTransaction(null);
+    showToast('Transaksi dihapus', 'delete');
   };
 
   const saveAccount = (e) => {
@@ -441,16 +455,18 @@ useEffect(() => {
     );
 
     if (duplicated) {
-      alert('Rekening sudah ada');
+      showToast('Rekening sudah ada', 'error');
       return;
     }
 
     if (editingAccountName) {
+      showToast('Rekening diperbarui', 'success');
       setAccounts(accounts.map((account) => (account === editingAccountName ? name : account)));
       setTransactions(
         transactions.map((t) => (t.wallet === editingAccountName ? { ...t, wallet: name } : t))
       );
     } else {
+      showToast('Rekening ditambahkan', 'success');
       setAccounts([...accounts, name]);
     }
 
@@ -461,12 +477,13 @@ useEffect(() => {
 
   const deleteAccount = (account) => {
     if (transactions.some((t) => t.wallet === account)) {
-      alert('Rekening tidak bisa dihapus karena sudah digunakan');
+      showToast('Rekening tidak bisa dihapus karena sudah digunakan', 'error');
       return;
     }
 
     setAccounts(accounts.filter((item) => item !== account));
     setSelectedAccount(null);
+    showToast('Rekening dihapus', 'delete');
   };
 
   const saveLoan = (e) => {
@@ -482,7 +499,7 @@ useEffect(() => {
       const paid = oldLoan.amount - oldLoan.remaining;
 
       if (amount < paid) {
-        alert('Total pinjaman tidak boleh lebih kecil dari jumlah yang sudah terbayar');
+        showToast('Total pinjaman tidak boleh lebih kecil dari jumlah yang sudah terbayar', 'error');
         return;
       }
 
@@ -493,8 +510,10 @@ useEffect(() => {
             : loan
         )
       );
+      showToast('Pinjaman diperbarui', 'success');
     } else {
       setLoans([{ id: Date.now(), name, amount, remaining: amount, date: loanForm.date }, ...loans]);
+      showToast('Pinjaman ditambahkan', 'success');
     }
 
     setEditingLoanId(null);
@@ -503,12 +522,13 @@ useEffect(() => {
 
   const deleteLoan = (loan) => {
     if (transactions.some((t) => t.loanId === loan.id)) {
-      alert('Pinjaman tidak bisa dihapus karena sudah memiliki pembayaran');
+      showToast('Pinjaman tidak bisa dihapus karena sudah memiliki pembayaran', 'error');
       return;
     }
 
     setLoans(loans.filter((item) => item.id !== loan.id));
     setSelectedLoan(null);
+    showToast('Pinjaman dihapus', 'delete');
   };
 
   const downloadReportExcel = () => {
@@ -559,6 +579,7 @@ useEffect(() => {
     link.download = `report-${startDate}-to-${endDate}.xls`;
     link.click();
     URL.revokeObjectURL(url);
+    showToast('Report berhasil diunduh', 'success');
   };
 
   const downloadBackup = () => {
@@ -580,6 +601,7 @@ useEffect(() => {
     link.download = `backup-keuangan-${today()}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    showToast('Back Up Success', 'success', 'File backup berhasil diunduh');
   };
 
   const importBackup = (e) => {
@@ -597,7 +619,7 @@ useEffect(() => {
           !Array.isArray(data.transactions) ||
           !Array.isArray(data.loans)
         ) {
-          alert('File backup tidak valid');
+          showToast('File backup tidak valid', 'error');
           return;
         }
 
@@ -608,9 +630,9 @@ useEffect(() => {
         setActiveDetailCategory(null);
         setIsFabMenuOpen(false);
 
-        alert('Backup berhasil diimport');
+        showToast('Import Back Up Success', 'success', 'Data berhasil dipulihkan');
       } catch {
-        alert('Gagal membaca file backup');
+        showToast('Gagal membaca file backup', 'error');
       } finally {
         e.target.value = '';
       }
@@ -625,6 +647,7 @@ useEffect(() => {
     setAccounts(DEFAULT_ACCOUNTS);
     setActiveDetailCategory(null);
     setIsClearDataModalOpen(false);
+    showToast('Data berhasil dihapus', 'delete');
   };
 
 if (isCloudLoading) {
@@ -679,6 +702,7 @@ if (isCloudLoading) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between max-w-md mx-auto shadow-xl relative pb-20 select-none overflow-hidden">
+      {toast && <Toast key={toast.id} {...toast} />}
       <header className="bg-[#2196f3] text-white p-4 text-center font-semibold text-base shadow-sm flex justify-between items-center">
         {activeTab === 'report' ? (
           <>
@@ -1545,6 +1569,88 @@ function ActionButtons({ onClose, onEdit, onDelete }) {
       >
         Hapus
       </button>
+    </div>
+  );
+}
+
+function Toast({ message, subtitle, type }) {
+  const isSuccess = type === 'success';
+  const isWelcome = type === 'welcome';
+  const isDelete = type === 'delete';
+
+  const circleColor = isSuccess ? 'bg-green-500' : isWelcome ? 'bg-[#2196f3]' : 'bg-red-500';
+
+  return (
+    <div className="fixed inset-x-0 top-4 z-[60] flex justify-center px-4 pointer-events-none">
+      <style>{`
+        @keyframes toast-in {
+          0% { opacity: 0; transform: translateY(-28px) scale(0.9); }
+          60% { opacity: 1; transform: translateY(4px) scale(1.02); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toast-out {
+          to { opacity: 0; transform: translateY(-18px) scale(0.95); }
+        }
+        @keyframes toast-pop {
+          0% { transform: scale(0); }
+          70% { transform: scale(1.18); }
+          100% { transform: scale(1); }
+        }
+        @keyframes toast-draw {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes toast-wave {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(18deg); }
+          75% { transform: rotate(-14deg); }
+        }
+      `}</style>
+
+      <div
+        className="bg-white rounded-2xl shadow-xl border border-gray-100 px-4 py-3 flex items-center gap-3 min-w-[220px] max-w-sm"
+        style={{
+          animation: 'toast-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, toast-out 0.3s ease-in 2s forwards'
+        }}
+      >
+        <div
+          className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${circleColor}`}
+          style={{ animation: 'toast-pop 0.4s ease-out 0.1s both' }}
+        >
+          {isSuccess && (
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path
+                d="M5 12.5l4.5 4.5L19 7.5"
+                strokeDasharray="24"
+                strokeDashoffset="24"
+                style={{ animation: 'toast-draw 0.4s ease-out 0.35s forwards' }}
+              />
+            </svg>
+          )}
+
+          {isWelcome && (
+            <span className="text-xl leading-none" style={{ display: 'inline-block', transformOrigin: '70% 70%', animation: 'toast-wave 0.9s ease-in-out 0.4s 2' }}>
+              👋
+            </span>
+          )}
+
+          {isDelete && (
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+            </svg>
+          )}
+
+          {type === 'error' && (
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+              <path d="M12 6v8M12 18v.5" />
+            </svg>
+          )}
+        </div>
+
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-800 text-sm leading-tight">{message}</p>
+          {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        </div>
+      </div>
     </div>
   );
 }
