@@ -48,6 +48,26 @@ const getPeriodRange = (period) => {
 };
 
 const ICONS = {
+  home: (
+    <>
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  close: <path d="M18 6 6 18M6 6l12 12" />,
+  user: (
+    <>
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </>
+  ),
   food: (
     <>
       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
@@ -259,6 +279,68 @@ function RadarChart({ items }) {
   );
 }
 
+const WALLET_TINTS = ['from-emerald-300/25', 'from-peach/30', 'from-sky-300/25', 'from-violet-300/25'];
+
+// Urut terbaru: tanggal terbesar dulu, lalu id terbesar
+const sortByRecent = (a, b) => b.date.localeCompare(a.date) || Number(b.id) - Number(a.id);
+
+function SectionTitle({ title, subtitle, actionLabel, onAction }) {
+  return (
+    <div className="flex justify-between items-end mb-3">
+      <div>
+        <h3 className="font-serif text-lg leading-tight">{title}</h3>
+        {subtitle && <p className="text-xs text-white/50 mt-0.5">{subtitle}</p>}
+      </div>
+      {onAction && (
+        <button type="button" onClick={onAction} className="text-xs text-white/50">
+          {actionLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Grafik area halus (dipakai di Home dan Report)
+function AreaSpark({ values, id, className = 'w-full h-28' }) {
+  if (!values.length) return null;
+
+  const max = Math.max(0, ...values);
+  const pts = values.length === 1 ? [values[0], values[0]] : values;
+  const x = (i) => (pts.length > 1 ? (i / (pts.length - 1)) * 300 : 0);
+  const y = (v) => 108 - (max > 0 ? (v / max) * 98 : 0);
+
+  let line = '';
+  pts.forEach((v, i) => {
+    if (i === 0) {
+      line = `M${x(i)},${y(v)}`;
+    } else {
+      const mx = (x(i - 1) + x(i)) / 2;
+      line += ` C${mx},${y(pts[i - 1])} ${mx},${y(v)} ${x(i)},${y(v)}`;
+    }
+  });
+
+  return (
+    <svg viewBox="0 0 300 110" preserveAspectRatio="none" className={className}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f2a97e" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#f2a97e" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L300,110 L0,110 Z`} fill={`url(#${id})`} />
+      <path
+        d={line}
+        fill="none"
+        stroke="#f2a97e"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
 function Icon({ name, className = 'w-5 h-5' }) {
   return (
     <svg
@@ -297,7 +379,9 @@ const [cloudStatus, setCloudStatus] = useState('Menghubungkan ke Firestore...');
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [activeTab, setActiveTab] = useState('home');
+  const [userName, setUserName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [period, setPeriod] = useState('month');
   const [txStartDate, setTxStartDate] = useState(() => getPeriodRange('month')[0]);
   const [txEndDate, setTxEndDate] = useState(() => getPeriodRange('month')[1]);
@@ -367,6 +451,7 @@ useEffect(() => {
         setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
         setLoans(Array.isArray(data.loans) ? data.loans : []);
         setShowDecimals(Boolean(data.showDecimals));
+        setUserName(typeof data.userName === 'string' ? data.userName : '');
       }
 
       hasLoadedCloudData.current = true;
@@ -398,6 +483,7 @@ useEffect(() => {
           transactions,
           loans,
           showDecimals,
+          userName,
           updatedAt: serverTimestamp()
         },
         { merge: true }
@@ -411,7 +497,7 @@ useEffect(() => {
   }, 700);
 
   return () => clearTimeout(timeout);
-}, [accounts, transactions, loans, showDecimals]);
+}, [accounts, transactions, loans, showDecimals, userName]);
   const formatNumber = (num) => {
     return Number(num || 0).toLocaleString('id-ID', {
       minimumFractionDigits: showDecimals ? 2 : 0,
@@ -470,9 +556,9 @@ useEffect(() => {
       ? [txStartDate || null, txEndDate || null]
       : getPeriodRange(period);
   const isTxRangeInvalid = Boolean(rangeStart && rangeEnd && rangeStart > rangeEnd);
-  const periodTransactions = transactions.filter(
-    (t) => (!rangeStart || t.date >= rangeStart) && (!rangeEnd || t.date <= rangeEnd)
-  );
+  const periodTransactions = transactions
+    .filter((t) => (!rangeStart || t.date >= rangeStart) && (!rangeEnd || t.date <= rangeEnd))
+    .sort(sortByRecent);
 
   const periodIncome = periodTransactions
     .filter((t) => t.type === 'income')
@@ -595,29 +681,66 @@ useEffect(() => {
   }
 
   const dynamicsMax = Math.max(0, ...dynamics.map((d) => d.value));
-  const dynPoints = dynamics.length === 1 ? [dynamics[0], dynamics[0]] : dynamics;
-  const dynX = (i) => (dynPoints.length > 1 ? (i / (dynPoints.length - 1)) * 300 : 0);
-  const dynY = (v) => 108 - (dynamicsMax > 0 ? (v / dynamicsMax) * 98 : 0);
-
-  let dynamicsLinePath = '';
-  dynPoints.forEach((d, i) => {
-    const x = dynX(i);
-    const y = dynY(d.value);
-    if (i === 0) {
-      dynamicsLinePath = `M${x},${y}`;
-    } else {
-      const px = dynX(i - 1);
-      const py = dynY(dynPoints[i - 1].value);
-      const mx = (px + x) / 2;
-      dynamicsLinePath += ` C${mx},${py} ${mx},${y} ${x},${y}`;
-    }
-  });
-  const dynamicsAreaPath = dynPoints.length > 1 ? `${dynamicsLinePath} L300,110 L0,110 Z` : '';
 
   const dynamicsLabel = (key) =>
     key.length === 7
       ? new Date(`${key}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
       : formatDateLabel(key);
+
+  // --- Home: pengeluaran bulan berjalan ---
+  const homeNow = new Date();
+  const homeYear = homeNow.getFullYear();
+  const homeMonth = homeNow.getMonth();
+  const homeMonthStart = toDateStr(new Date(homeYear, homeMonth, 1));
+  const homeMonthEnd = toDateStr(new Date(homeYear, homeMonth + 1, 0));
+  const homeToday = toDateStr(homeNow);
+  const isSpending = (t) => t.type === 'expense' || t.type === 'loanPayment';
+
+  const homeMonthLabel = homeNow.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+  const homeSpent = transactions
+    .filter((t) => isSpending(t) && t.date >= homeMonthStart && t.date <= homeMonthEnd)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Pembanding adil: bulan lalu sampai tanggal yang sama dengan hari ini
+  const prevMonthStart = toDateStr(new Date(homeYear, homeMonth - 1, 1));
+  const prevMonthDays = new Date(homeYear, homeMonth, 0).getDate();
+  const prevCutoff = toDateStr(new Date(homeYear, homeMonth - 1, Math.min(homeNow.getDate(), prevMonthDays)));
+
+  const homeSpentToDate = transactions
+    .filter((t) => isSpending(t) && t.date >= homeMonthStart && t.date <= homeToday)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const homePrevSpent = transactions
+    .filter((t) => isSpending(t) && t.date >= prevMonthStart && t.date <= prevCutoff)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const homeChange =
+    homePrevSpent > 0 ? Math.round(((homeSpentToDate - homePrevSpent) / homePrevSpent) * 100) : null;
+
+  const homeDaily = [];
+  for (let day = 1; day <= homeNow.getDate(); day++) {
+    const key = toDateStr(new Date(homeYear, homeMonth, day));
+    homeDaily.push(
+      transactions
+        .filter((t) => isSpending(t) && t.date === key)
+        .reduce((sum, t) => sum + t.amount, 0)
+    );
+  }
+
+  const recentTransactions = [...transactions].sort(sortByRecent).slice(0, 5);
+
+  const searchTerm = searchQuery.trim().toLowerCase();
+  const searchResults = searchTerm
+    ? transactions
+        .filter((t) =>
+          [t.title, getCategoryName(t), t.wallet, typeLabel(t.type), t.date, String(t.amount)]
+            .join(' ')
+            .toLowerCase()
+            .includes(searchTerm)
+        )
+        .sort(sortByRecent)
+    : [];
 
   const totalLoanRemaining = loans.reduce((sum, loan) => sum + loan.remaining, 0);
 
@@ -629,6 +752,31 @@ useEffect(() => {
       return sum;
     }, 0);
   };
+
+  const renderTransactionRow = (t) => (
+    <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setSelectedTransaction(t)}
+                    className="glass w-full text-left rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition-transform"
+                  >
+                    <div
+                      className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${typeIconStyle(t.type)}`}
+                    >
+                      <Icon name={getTxIcon(t)} className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{t.title}</p>
+                      <p className="text-xs text-white/50">
+                        {[getCategoryName(t), t.wallet, formatDateLabel(t.date)].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    <div className={`font-semibold text-sm whitespace-nowrap ${typeColor(t.type)}`}>
+                      {signed(t)}
+                      {formatNumber(t.amount)}
+                    </div>
+                  </button>
+  );
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -932,6 +1080,7 @@ useEffect(() => {
       transactions,
       loans,
       showDecimals,
+      userName,
       backupDate: new Date().toISOString()
     };
 
@@ -971,6 +1120,7 @@ useEffect(() => {
         setTransactions(data.transactions);
         setLoans(data.loans);
         setShowDecimals(Boolean(data.showDecimals));
+        setUserName(typeof data.userName === 'string' ? data.userName : '');
         setActiveDetailCategory(null);
         setIsFabMenuOpen(false);
 
@@ -1047,8 +1197,42 @@ if (isCloudLoading) {
   return (
     <div className="min-h-screen app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden">
       {toast && <Toast key={toast.id} {...toast} />}
-      <header className="px-4 pt-5 pb-3 flex justify-between items-center">
-        {activeTab === 'report' ? (
+      <header className="px-4 pt-5 pb-3 flex justify-between items-center gap-3">
+        {activeTab === 'home' ? (
+          <>
+            <div className="relative flex-1">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+                <Icon name="search" className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari transaksi"
+                className="field pl-10 pr-9 rounded-full text-sm"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50"
+                >
+                  <Icon name="close" className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('settings');
+                setIsFabMenuOpen(false);
+              }}
+              className="w-9 h-9 shrink-0 rounded-full glass flex items-center justify-center text-peach active:scale-95 transition-transform"
+            >
+              <Icon name="settings" className="w-4 h-4" />
+            </button>
+          </>
+        ) : activeTab === 'report' ? (
           <>
             <span className="w-9"></span>
             <span className="font-serif text-xl">Report</span>
@@ -1079,6 +1263,204 @@ if (isCloudLoading) {
       </header>
 
       <main className="flex-1 overflow-y-auto">
+        {activeTab === 'home' && (
+          <div className="p-4 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 shrink-0 rounded-full bg-peach/20 border border-peach/40 text-peach flex items-center justify-center font-serif text-lg">
+                {userName.trim() ? userName.trim()[0].toUpperCase() : <Icon name="user" className="w-5 h-5" />}
+              </div>
+              <div className="min-w-0">
+                <p className="font-serif text-2xl leading-tight truncate">
+                  <span className="text-white/50">Hello</span> {userName.trim()}
+                </p>
+                {!userName.trim() && (
+                  <button type="button" onClick={() => setActiveTab('settings')} className="text-[11px] text-peach">
+                    Atur nama Anda
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {searchTerm ? (
+              <div>
+                <SectionTitle title="Hasil pencarian" subtitle={`${searchResults.length} transaksi ditemukan`} />
+                {searchResults.length === 0 ? (
+                  <div className="h-48 flex flex-col items-center justify-center gap-3 text-white/30 text-sm">
+                    <Icon name="search" className="w-10 h-10" />
+                    Tidak ditemukan
+                  </div>
+                ) : (
+                  <div className="space-y-3">{searchResults.map(renderTransactionRow)}</div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div>
+                  <SectionTitle
+                    title="Wallet"
+                    subtitle={`Total saldo ${formatNumber(totalBalance)}`}
+                    actionLabel="Lihat semua"
+                    onAction={() => setActiveTab('wallet')}
+                  />
+                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {accounts.map((account, index) => (
+                      <button
+                        key={account}
+                        type="button"
+                        onClick={() => setSelectedAccount(account)}
+                        className={`glass snap-start shrink-0 w-44 rounded-2xl p-4 text-left bg-gradient-to-br ${
+                          WALLET_TINTS[index % WALLET_TINTS.length]
+                        } to-white/5`}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-peach">
+                          <Icon name="wallet" className="w-4 h-4" />
+                        </div>
+                        <p className="text-xs text-white/60 mt-4 truncate">{account}</p>
+                        <p className="font-serif text-xl mt-0.5 truncate">{formatNumber(getWalletBalance(account))}</p>
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAccountName('');
+                        setAccountName('');
+                        setAccountModalOpen(true);
+                      }}
+                      className="snap-start shrink-0 w-24 rounded-2xl border border-dashed border-white/25 text-white/50 flex flex-col items-center justify-center gap-1 text-xs"
+                    >
+                      <Icon name="plus" className="w-5 h-5" />
+                      Rekening
+                    </button>
+                  </div>
+                </div>
+
+                <div className="glass rounded-3xl p-5">
+                  <p className="text-xs text-white/60">Pengeluaran {homeMonthLabel}</p>
+                  <div className="flex items-end gap-2 mt-1">
+                    <p className="font-serif text-3xl">{formatNumber(homeSpent)}</p>
+                    {homeChange !== null && (
+                      <span
+                        className={`mb-1 text-[11px] px-2 py-0.5 rounded-full ${
+                          homeChange <= 0
+                            ? 'bg-emerald-400/15 text-emerald-300'
+                            : 'bg-rose-400/15 text-rose-300'
+                        }`}
+                      >
+                        {homeChange <= 0 ? '↓' : '↑'} {Math.abs(homeChange)}%
+                      </span>
+                    )}
+                  </div>
+
+                  {homeSpent > 0 ? (
+                    <div className="mt-3">
+                      <AreaSpark values={homeDaily} id="homeFill" className="w-full h-16" />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/40 mt-3">Belum ada pengeluaran bulan ini</p>
+                  )}
+
+                  <p className="text-[11px] text-white/50 mt-2">
+                    {homeChange !== null
+                      ? `dibanding bulan lalu di tanggal yang sama (${formatNumber(homePrevSpent)})`
+                      : 'Belum ada data bulan lalu untuk dibandingkan'}
+                  </p>
+                </div>
+
+                <div>
+                  <SectionTitle title="Tambah cepat" />
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      ['Income', 'arrowDown', 'income'],
+                      ['Expense', 'arrowUp', 'expense'],
+                      ['Transfer', 'transfer', 'transfer'],
+                      ['Pinjaman', 'loan', 'loanPayment']
+                    ].map(([label, icon, type]) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => openTransactionModal(type)}
+                        className="flex flex-col items-center gap-2 active:scale-95 transition-transform"
+                      >
+                        <span className="w-12 h-12 rounded-full glass flex items-center justify-center text-peach">
+                          <Icon name={icon} className="w-5 h-5" />
+                        </span>
+                        <span className="text-[11px] text-white/70">{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {loans.length > 0 && (
+                  <div>
+                    <SectionTitle
+                      title="Pinjaman"
+                      subtitle={`Sisa ${formatNumber(totalLoanRemaining)}`}
+                      actionLabel="Lihat semua"
+                      onAction={() => setActiveTab('loan')}
+                    />
+                    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {loans.map((loan) => {
+                        const percent =
+                          loan.amount > 0 ? Math.round(((loan.amount - loan.remaining) / loan.amount) * 100) : 0;
+
+                        return (
+                          <button
+                            key={loan.id}
+                            type="button"
+                            onClick={() => setSelectedLoan(loan)}
+                            className="glass snap-start shrink-0 w-64 rounded-2xl p-4 flex items-center gap-3 text-left"
+                          >
+                            <div className="relative w-12 h-12 shrink-0">
+                              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3.5" />
+                                <circle
+                                  cx="18"
+                                  cy="18"
+                                  r="15.915"
+                                  fill="none"
+                                  stroke="#f2a97e"
+                                  strokeWidth="3.5"
+                                  strokeLinecap="round"
+                                  strokeDasharray={`${percent} ${100 - percent}`}
+                                />
+                              </svg>
+                              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold">
+                                {percent}%
+                              </span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm truncate">{loan.name}</p>
+                              <p className="text-[11px] text-white/60">Sisa {formatNumber(loan.remaining)}</p>
+                              <p className="text-[11px] text-white/40">dari {formatNumber(loan.amount)}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <SectionTitle
+                    title="Transaksi terbaru"
+                    actionLabel="Lihat semua"
+                    onAction={() => setActiveTab('transactions')}
+                  />
+                  {recentTransactions.length === 0 ? (
+                    <div className="h-32 flex flex-col items-center justify-center gap-3 text-white/30 text-sm">
+                      <Icon name="inbox" className="w-8 h-8" />
+                      Belum ada transaksi
+                    </div>
+                  ) : (
+                    <div className="space-y-3">{recentTransactions.map(renderTransactionRow)}</div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {activeTab === 'transactions' && (
           <div className="p-4">
             <div className="mb-4">
@@ -1163,30 +1545,7 @@ if (isCloudLoading) {
               </div>
             ) : (
               <div className="space-y-3">
-                {periodTransactions.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setSelectedTransaction(t)}
-                    className="glass w-full text-left rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition-transform"
-                  >
-                    <div
-                      className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${typeIconStyle(t.type)}`}
-                    >
-                      <Icon name={getTxIcon(t)} className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{t.title}</p>
-                      <p className="text-xs text-white/50">
-                        {[getCategoryName(t), t.wallet, formatDateLabel(t.date)].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    <div className={`font-semibold text-sm whitespace-nowrap ${typeColor(t.type)}`}>
-                      {signed(t)}
-                      {formatNumber(t.amount)}
-                    </div>
-                  </button>
-                ))}
+                {periodTransactions.map(renderTransactionRow)}
               </div>
             )}
           </div>
@@ -1445,24 +1804,7 @@ if (isCloudLoading) {
                     </p>
                   ) : (
                     <>
-                      <svg viewBox="0 0 300 110" preserveAspectRatio="none" className="w-full h-28">
-                        <defs>
-                          <linearGradient id="dynFill" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#f2a97e" stopOpacity="0.45" />
-                            <stop offset="100%" stopColor="#f2a97e" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                        <path d={dynamicsAreaPath} fill="url(#dynFill)" />
-                        <path
-                          d={dynamicsLinePath}
-                          fill="none"
-                          stroke="#f2a97e"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      </svg>
+                      <AreaSpark values={dynamics.map((d) => d.value)} id="dynFill" />
                       <div className="flex justify-between text-[10px] text-white/50 mt-1">
                         <span>{dynamicsLabel(dynamics[0].key)}</span>
                         <span>{dynamicsLabel(dynamics[dynamics.length - 1].key)}</span>
@@ -1532,6 +1874,18 @@ if (isCloudLoading) {
 
         {activeTab === 'settings' && (
           <div className="p-4 space-y-4 text-sm">
+            <div className="glass rounded-2xl p-4">
+              <label className="block text-white/60 text-xs mb-1">Nama</label>
+              <input
+                type="text"
+                maxLength={24}
+                placeholder="Nama Anda"
+                className="field"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+              />
+            </div>
+
             <div className="glass rounded-2xl divide-y divide-white/10">
               <div className="flex justify-between items-center p-4">
                 <span>Status Cloud</span>
@@ -1589,7 +1943,7 @@ if (isCloudLoading) {
         )}
       </main>
 
-      {activeTab !== 'report' && (
+      {activeTab !== 'report' && activeTab !== 'home' && (
         <>
           {isFabMenuOpen && (
             <button
@@ -1974,6 +2328,7 @@ if (isCloudLoading) {
 
       <footer className="glass-nav absolute bottom-0 left-0 right-0 h-16 flex justify-around items-stretch text-[10px] text-white/50 z-30">
         {[
+          ['home', 'home', 'Home'],
           ['transactions', 'list', 'Transactions'],
           ['wallet', 'wallet', 'Wallet'],
           ['report', 'chart', 'Report'],
