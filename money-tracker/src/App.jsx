@@ -1195,9 +1195,7 @@ if (isCloudLoading) {
   }
 
   return (
-    <div
-      className="min-h-screen app-bg flex flex-col max-w-md mx-auto shadow-2xl relative select-none [transform:translateZ(0)]"
-    >
+    <div className="min-h-screen app-bg flex flex-col max-w-md mx-auto shadow-2xl relative select-none">
       {toast && <Toast key={toast.id} {...toast} />}
       <header className="px-4 pt-5 pb-3 flex justify-between items-center gap-3">
         {activeTab === 'home' ? (
