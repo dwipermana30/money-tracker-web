@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-const DEFAULT_ACCOUNTS = ['BCA', 'BRI', 'Dana', 'Gopay','Cash'];
+const DEFAULT_ACCOUNTS = ['BCA', 'BRI', 'Dana', 'Gopay'];
 const APP_PASSWORD = '3003';
 const FIRESTORE_COLLECTION = 'financeApps';
 const FIRESTORE_DOCUMENT_ID = 'main-data';
@@ -1195,7 +1195,7 @@ if (isCloudLoading) {
   }
 
   return (
-    <div className="min-h-screen app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden">
+    <div className="h-[100dvh] app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden">
       {toast && <Toast key={toast.id} {...toast} />}
       <header className="px-4 pt-5 pb-3 flex justify-between items-center gap-3">
         {activeTab === 'home' ? (
@@ -1262,7 +1262,7 @@ if (isCloudLoading) {
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 min-h-0 overflow-y-auto">
         {activeTab === 'home' && (
           <div className="p-4 space-y-6">
             <div className="flex items-center gap-3">
