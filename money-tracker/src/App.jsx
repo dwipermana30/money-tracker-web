@@ -371,6 +371,26 @@ export default function App() {
   };
 
   const backupInputRef = useRef(null);
+
+  // Tinggi layar sesungguhnya (menghindari salah hitung 100dvh di beberapa
+  // browser mobile, terutama Chrome Android saat address bar/toolbar tampil).
+  useEffect(() => {
+    const setAppHeight = () => {
+      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', `${h}px`);
+    };
+
+    setAppHeight();
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    window.visualViewport?.addEventListener('resize', setAppHeight);
+
+    return () => {
+      window.removeEventListener('resize', setAppHeight);
+      window.removeEventListener('orientationchange', setAppHeight);
+      window.visualViewport?.removeEventListener('resize', setAppHeight);
+    };
+  }, []);
 const hasLoadedCloudData = useRef(false);
 
 const [isCloudLoading, setIsCloudLoading] = useState(true);
@@ -1195,7 +1215,10 @@ if (isCloudLoading) {
   }
 
   return (
-    <div className="h-[100dvh] app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden">
+    <div
+      className="h-screen app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden"
+      style={{ height: 'var(--app-height, 100vh)' }}
+    >
       {toast && <Toast key={toast.id} {...toast} />}
       <header className="px-4 pt-5 pb-3 flex justify-between items-center gap-3">
         {activeTab === 'home' ? (
