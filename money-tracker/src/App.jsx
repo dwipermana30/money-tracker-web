@@ -371,26 +371,6 @@ export default function App() {
   };
 
   const backupInputRef = useRef(null);
-
-  // Tinggi layar sesungguhnya (menghindari salah hitung 100dvh di beberapa
-  // browser mobile, terutama Chrome Android saat address bar/toolbar tampil).
-  useEffect(() => {
-    const setAppHeight = () => {
-      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      document.documentElement.style.setProperty('--app-height', `${h}px`);
-    };
-
-    setAppHeight();
-    window.addEventListener('resize', setAppHeight);
-    window.addEventListener('orientationchange', setAppHeight);
-    window.visualViewport?.addEventListener('resize', setAppHeight);
-
-    return () => {
-      window.removeEventListener('resize', setAppHeight);
-      window.removeEventListener('orientationchange', setAppHeight);
-      window.visualViewport?.removeEventListener('resize', setAppHeight);
-    };
-  }, []);
 const hasLoadedCloudData = useRef(false);
 
 const [isCloudLoading, setIsCloudLoading] = useState(true);
@@ -1216,8 +1196,7 @@ if (isCloudLoading) {
 
   return (
     <div
-      className="h-screen app-bg flex flex-col justify-between max-w-md mx-auto shadow-2xl relative pb-20 select-none overflow-hidden"
-      style={{ height: 'var(--app-height, 100vh)' }}
+      className="min-h-screen app-bg flex flex-col max-w-md mx-auto shadow-2xl relative select-none [transform:translateZ(0)]"
     >
       {toast && <Toast key={toast.id} {...toast} />}
       <header className="px-4 pt-5 pb-3 flex justify-between items-center gap-3">
@@ -1285,7 +1264,7 @@ if (isCloudLoading) {
         )}
       </header>
 
-      <main className="flex-1 min-h-0 overflow-y-auto">
+      <main className="flex-1 pb-24">
         {activeTab === 'home' && (
           <div className="p-4 space-y-6">
             <div className="flex items-center gap-3">
@@ -1976,7 +1955,7 @@ if (isCloudLoading) {
             />
           )}
 
-          <div className="absolute bottom-20 right-6 z-40 flex flex-col items-end gap-3">
+          <div className="fixed bottom-20 right-6 z-40 flex flex-col items-end gap-3">
             {activeTab === 'wallet' ? (
               <FabItem
                 open={isFabMenuOpen}
@@ -2349,7 +2328,7 @@ if (isCloudLoading) {
         </Modal>
       )}
 
-      <footer className="glass-nav absolute bottom-0 left-0 right-0 h-16 flex justify-around items-stretch text-[10px] text-white/50 z-30">
+      <footer className="glass-nav fixed bottom-0 left-0 right-0 h-16 flex justify-around items-stretch text-[10px] text-white/50 z-30">
         {[
           ['home', 'home', 'Home'],
           ['transactions', 'list', 'Transactions'],
